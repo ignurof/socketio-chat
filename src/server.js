@@ -1,11 +1,46 @@
 // Required dependency
 const express = require("express");
+const cors = require("cors");
 const svelteViewEngine = require("svelte-view-engine");
 const config = require("../config.js");
 
 // Application
 let app = express();
 const PORT = 3002;
+
+// Socket IO
+const socketio = require("socket.io");
+// Hook up the app.listen to a const so I can hook into it with socket listen aka io
+const server = app.listen(PORT, () => {
+    console.log("Server listening on port: " + PORT);
+});
+const io = socketio(server);
+
+// This is what happens when a client connects to ws server
+io.on("connection", (socket) => {
+    console.log("Connection opened");
+
+    // FIXME: I can use emit anywhere, but not certain I can recieve everywhere
+    // Send from server to client, use key on both ends to access
+    socket.emit("world", "World");
+
+    // handle the event sent with socket.emit() from client
+    socket.on("hello", (elem1) => {
+        console.log(elem1);
+    });
+});
+
+// CORS SETUP
+let corsOptions = {
+    "origin": 'chat.ignurof.xyz',
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "preflightContinue": false,
+    "optionsSuccessStatus": 204
+}
+
+// Preflight request using corsOptions object, for all routes
+app.use(cors(corsOptions))
+
 
 // View Engine declarations
 let engine = svelteViewEngine(config.svelteViewEngine);
@@ -28,6 +63,3 @@ app.get("/", async(req, res, next) => {
     });
 });
 
-app.listen(PORT, () => {
-    console.log("Server listening on port: " + PORT);
-});

@@ -19,6 +19,7 @@
   "dependencies": {
     "express": "^4.17.1",
     "socket.io": "^4.3.2",
+    "socket.io-client": "^4.3.2",
     "svelte": "^3.44.1",
     "svelte-view-engine": "github:Blade67/svelte-view-engine"
   }
