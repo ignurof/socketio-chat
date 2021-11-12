@@ -1,0 +1,25 @@
+{
+  "name": "socketio-chat",
+  "version": "1.0.0",
+  "description": "Made with Express, Svelte &amp; SocketIO",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ignurof/socketio-chat.git"
+  },
+  "author": "ignurof.xyz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ignurof/socketio-chat/issues"
+  },
+  "homepage": "https://github.com/ignurof/socketio-chat#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.3.2",
+    "svelte": "^3.44.1",
+    "svelte-view-engine": "github:Blade67/svelte-view-engine"
+  }
+}
