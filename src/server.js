@@ -16,7 +16,9 @@ let corsOptions = {
     "origin": 'chat.ignurof.xyz',
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
     "preflightContinue": false,
-    "optionsSuccessStatus": 204
+    "optionsSuccessStatus": 204,
+    "credentials": true,
+    "allowedHeaders": ['Origin', 'X-Requested-With', 'Content-Type', 'Accept']
 }
 
 // Preflight request using corsOptions object, for all routes
@@ -52,22 +54,16 @@ const server = app.listen(PORT, () => {
 });
 const io = socketio(server);
 
-// Keep the io instance
+// Keep the io instance aka send it to routes
 app.set('socketio', io);
 
 // This is what happens when a client connects to ws server
 io.on("connection", (socket) => {
-    // FIXME: I can use emit anywhere, but not certain I can recieve everywhere
-    // handle the event sent with socket.emit() from client
-    //socket.on("clientConnect", (elem1) => {
-    //    console.log(elem1);
-    //});
-
     // Send from server to client, use key on both ends to access
     //socket.emit("world", "World");
 
-    socket.on("clientMessage", (clientMsg) => {
-        console.log("CLIENT: " + clientMsg);
-    })
+    //socket.on("clientMessage", (clientMsg) => {
+    //    console.log("CLIENT: " + clientMsg);
+    //})
 });
 

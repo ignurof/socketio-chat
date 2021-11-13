@@ -3885,11 +3885,11 @@ var Index = (function () {
     		},
     		h: function hydrate() {
     			attr_dev(h4, "class", "svelte-127bm7n");
-    			add_location(h4, file$1, 238, 12, 5081);
+    			add_location(h4, file$1, 238, 12, 5083);
     			attr_dev(p, "class", "svelte-127bm7n");
-    			add_location(p, file$1, 239, 12, 5122);
+    			add_location(p, file$1, 239, 12, 5124);
     			attr_dev(div, "class", "client-message svelte-127bm7n");
-    			add_location(div, file$1, 237, 8, 5039);
+    			add_location(div, file$1, 237, 8, 5041);
     		},
     		m: function mount(target, anchor) {
     			insert_hydration_dev(target, div, anchor);
@@ -4006,27 +4006,27 @@ var Index = (function () {
     		},
     		h: function hydrate() {
     			attr_dev(h1, "class", "svelte-127bm7n");
-    			add_location(h1, file$1, 233, 0, 4946);
+    			add_location(h1, file$1, 233, 0, 4948);
     			attr_dev(div0, "class", "chat-view svelte-127bm7n");
-    			add_location(div0, file$1, 235, 0, 4963);
+    			add_location(div0, file$1, 235, 0, 4965);
     			attr_dev(fieldset, "contenteditable", "true");
     			attr_dev(fieldset, "class", "svelte-127bm7n");
     			if (/*newMessage*/ ctx[1] === void 0) add_render_callback(() => /*fieldset_input_handler*/ ctx[3].call(fieldset));
-    			add_location(fieldset, file$1, 245, 4, 5218);
+    			add_location(fieldset, file$1, 245, 4, 5220);
     			attr_dev(path, "id", "Path_3");
     			attr_dev(path, "data-name", "Path 3");
     			attr_dev(path, "d", "M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z");
     			attr_dev(path, "transform", "translate(-0.01 0.031)");
     			attr_dev(path, "fill", "#1e88e5");
-    			add_location(path, file$1, 247, 8, 5429);
+    			add_location(path, file$1, 247, 8, 5431);
     			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg, "width", "49.369");
     			attr_dev(svg, "height", "49.384");
     			attr_dev(svg, "viewBox", "0 0 49.369 49.384");
     			attr_dev(svg, "class", "svelte-127bm7n");
-    			add_location(svg, file$1, 246, 4, 5289);
+    			add_location(svg, file$1, 246, 4, 5291);
     			attr_dev(div1, "class", "message-box svelte-127bm7n");
-    			add_location(div1, file$1, 244, 0, 5187);
+    			add_location(div1, file$1, 244, 0, 5189);
     		},
     		m: function mount(target, anchor) {
     			insert_hydration_dev(target, h1, anchor);
@@ -4116,7 +4116,7 @@ var Index = (function () {
     function instance$1($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Chat', slots, []);
-    	const socket = lookup("localhost:3002");
+    	const socket = lookup("chat.ignurof.xyz");
     	let { chatHistory = [] } = $$props;
 
     	// Client socket callback that occurs on connection to server. 
