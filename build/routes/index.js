@@ -162,6 +162,12 @@ var Index = (function () {
     function detach(node) {
         node.parentNode.removeChild(node);
     }
+    function destroy_each(iterations, detaching) {
+        for (let i = 0; i < iterations.length; i += 1) {
+            if (iterations[i])
+                iterations[i].d(detaching);
+        }
+    }
     function element(name) {
         return document.createElement(name);
     }
@@ -550,6 +556,22 @@ var Index = (function () {
             dispatch_dev('SvelteDOMRemoveAttribute', { node, attribute });
         else
             dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
+    }
+    function set_data_dev(text, data) {
+        data = '' + data;
+        if (text.wholeText === data)
+            return;
+        dispatch_dev('SvelteDOMSetData', { node: text, data });
+        text.data = data;
+    }
+    function validate_each_argument(arg) {
+        if (typeof arg !== 'string' && !(arg && typeof arg === 'object' && 'length' in arg)) {
+            let msg = '{#each} only iterates over array-like objects.';
+            if (typeof Symbol === 'function' && arg && Symbol.iterator in arg) {
+                msg += ' You can use a spread to convert this iterable into an array.';
+            }
+            throw new Error(msg);
+        }
     }
     function validate_slots(name, slot, keys) {
         for (const slot_key of Object.keys(slot)) {
@@ -3815,112 +3837,125 @@ var Index = (function () {
     const { console: console_1 } = globals;
     const file$1 = "src\\components\\chat.svelte";
 
+    function get_each_context(ctx, list, i) {
+    	const child_ctx = ctx.slice();
+    	child_ctx[8] = list[i];
+    	child_ctx[10] = i;
+    	return child_ctx;
+    }
+
+    // (237:4) {#each chatHistory as chatMessage, i}
+    function create_each_block(ctx) {
+    	let div;
+    	let h4;
+    	let t0_value = /*chatMessage*/ ctx[8].user + "";
+    	let t0;
+    	let t1;
+    	let p;
+    	let t2_value = /*chatMessage*/ ctx[8].msg + "";
+    	let t2;
+    	let t3;
+
+    	const block = {
+    		c: function create() {
+    			div = element("div");
+    			h4 = element("h4");
+    			t0 = text(t0_value);
+    			t1 = space();
+    			p = element("p");
+    			t2 = text(t2_value);
+    			t3 = space();
+    			this.h();
+    		},
+    		l: function claim(nodes) {
+    			div = claim_element(nodes, "DIV", { class: true });
+    			var div_nodes = children(div);
+    			h4 = claim_element(div_nodes, "H4", { class: true });
+    			var h4_nodes = children(h4);
+    			t0 = claim_text(h4_nodes, t0_value);
+    			h4_nodes.forEach(detach_dev);
+    			t1 = claim_space(div_nodes);
+    			p = claim_element(div_nodes, "P", { class: true });
+    			var p_nodes = children(p);
+    			t2 = claim_text(p_nodes, t2_value);
+    			p_nodes.forEach(detach_dev);
+    			t3 = claim_space(div_nodes);
+    			div_nodes.forEach(detach_dev);
+    			this.h();
+    		},
+    		h: function hydrate() {
+    			attr_dev(h4, "class", "svelte-127bm7n");
+    			add_location(h4, file$1, 238, 12, 5081);
+    			attr_dev(p, "class", "svelte-127bm7n");
+    			add_location(p, file$1, 239, 12, 5122);
+    			attr_dev(div, "class", "client-message svelte-127bm7n");
+    			add_location(div, file$1, 237, 8, 5039);
+    		},
+    		m: function mount(target, anchor) {
+    			insert_hydration_dev(target, div, anchor);
+    			append_hydration_dev(div, h4);
+    			append_hydration_dev(h4, t0);
+    			append_hydration_dev(div, t1);
+    			append_hydration_dev(div, p);
+    			append_hydration_dev(p, t2);
+    			append_hydration_dev(div, t3);
+    		},
+    		p: function update(ctx, dirty) {
+    			if (dirty & /*chatHistory*/ 1 && t0_value !== (t0_value = /*chatMessage*/ ctx[8].user + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*chatHistory*/ 1 && t2_value !== (t2_value = /*chatMessage*/ ctx[8].msg + "")) set_data_dev(t2, t2_value);
+    		},
+    		d: function destroy(detaching) {
+    			if (detaching) detach_dev(div);
+    		}
+    	};
+
+    	dispatch_dev("SvelteRegisterBlock", {
+    		block,
+    		id: create_each_block.name,
+    		type: "each",
+    		source: "(237:4) {#each chatHistory as chatMessage, i}",
+    		ctx
+    	});
+
+    	return block;
+    }
+
     function create_fragment$1(ctx) {
     	let h1;
     	let t0;
     	let t1;
-    	let div6;
     	let div0;
-    	let h40;
     	let t2;
-    	let t3;
-    	let p0;
-    	let t4;
-    	let t5;
     	let div1;
-    	let h41;
-    	let t6;
-    	let t7;
-    	let p1;
-    	let t8;
-    	let t9;
-    	let div2;
-    	let h42;
-    	let t10;
-    	let t11;
-    	let p2;
-    	let t12;
-    	let t13;
-    	let div3;
-    	let h43;
-    	let t14;
-    	let t15;
-    	let p3;
-    	let t16;
-    	let t17;
-    	let div4;
-    	let h44;
-    	let t18;
-    	let t19;
-    	let p4;
-    	let t20;
-    	let t21;
-    	let div5;
-    	let h45;
-    	let t22;
-    	let t23;
-    	let p5;
-    	let t24;
-    	let t25;
-    	let div7;
     	let fieldset;
-    	let t26;
+    	let t3;
     	let svg;
     	let path;
     	let mounted;
     	let dispose;
+    	let each_value = /*chatHistory*/ ctx[0];
+    	validate_each_argument(each_value);
+    	let each_blocks = [];
+
+    	for (let i = 0; i < each_value.length; i += 1) {
+    		each_blocks[i] = create_each_block(get_each_context(ctx, each_value, i));
+    	}
 
     	const block = {
     		c: function create() {
     			h1 = element("h1");
     			t0 = text("CHAT");
     			t1 = space();
-    			div6 = element("div");
     			div0 = element("div");
-    			h40 = element("h4");
-    			t2 = text("Username");
-    			t3 = space();
-    			p0 = element("p");
-    			t4 = text("Message here");
-    			t5 = space();
+
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].c();
+    			}
+
+    			t2 = space();
     			div1 = element("div");
-    			h41 = element("h4");
-    			t6 = text("Username");
-    			t7 = space();
-    			p1 = element("p");
-    			t8 = text("Message here");
-    			t9 = space();
-    			div2 = element("div");
-    			h42 = element("h4");
-    			t10 = text("Username");
-    			t11 = space();
-    			p2 = element("p");
-    			t12 = text("Message here");
-    			t13 = space();
-    			div3 = element("div");
-    			h43 = element("h4");
-    			t14 = text("Username");
-    			t15 = space();
-    			p3 = element("p");
-    			t16 = text("Message here");
-    			t17 = space();
-    			div4 = element("div");
-    			h44 = element("h4");
-    			t18 = text("Username");
-    			t19 = space();
-    			p4 = element("p");
-    			t20 = text("Message here");
-    			t21 = space();
-    			div5 = element("div");
-    			h45 = element("h4");
-    			t22 = text("Username");
-    			t23 = space();
-    			p5 = element("p");
-    			t24 = text("Message here");
-    			t25 = space();
-    			div7 = element("div");
     			fieldset = element("fieldset");
-    			t26 = space();
+    			t3 = space();
     			svg = svg_element("svg");
     			path = svg_element("path");
     			this.h();
@@ -3931,94 +3966,22 @@ var Index = (function () {
     			t0 = claim_text(h1_nodes, "CHAT");
     			h1_nodes.forEach(detach_dev);
     			t1 = claim_space(nodes);
-    			div6 = claim_element(nodes, "DIV", { class: true });
-    			var div6_nodes = children(div6);
-    			div0 = claim_element(div6_nodes, "DIV", { class: true });
+    			div0 = claim_element(nodes, "DIV", { class: true });
     			var div0_nodes = children(div0);
-    			h40 = claim_element(div0_nodes, "H4", { class: true });
-    			var h40_nodes = children(h40);
-    			t2 = claim_text(h40_nodes, "Username");
-    			h40_nodes.forEach(detach_dev);
-    			t3 = claim_space(div0_nodes);
-    			p0 = claim_element(div0_nodes, "P", { class: true });
-    			var p0_nodes = children(p0);
-    			t4 = claim_text(p0_nodes, "Message here");
-    			p0_nodes.forEach(detach_dev);
-    			div0_nodes.forEach(detach_dev);
-    			t5 = claim_space(div6_nodes);
-    			div1 = claim_element(div6_nodes, "DIV", { class: true });
-    			var div1_nodes = children(div1);
-    			h41 = claim_element(div1_nodes, "H4", { class: true });
-    			var h41_nodes = children(h41);
-    			t6 = claim_text(h41_nodes, "Username");
-    			h41_nodes.forEach(detach_dev);
-    			t7 = claim_space(div1_nodes);
-    			p1 = claim_element(div1_nodes, "P", { class: true });
-    			var p1_nodes = children(p1);
-    			t8 = claim_text(p1_nodes, "Message here");
-    			p1_nodes.forEach(detach_dev);
-    			div1_nodes.forEach(detach_dev);
-    			t9 = claim_space(div6_nodes);
-    			div2 = claim_element(div6_nodes, "DIV", { class: true });
-    			var div2_nodes = children(div2);
-    			h42 = claim_element(div2_nodes, "H4", { class: true });
-    			var h42_nodes = children(h42);
-    			t10 = claim_text(h42_nodes, "Username");
-    			h42_nodes.forEach(detach_dev);
-    			t11 = claim_space(div2_nodes);
-    			p2 = claim_element(div2_nodes, "P", { class: true });
-    			var p2_nodes = children(p2);
-    			t12 = claim_text(p2_nodes, "Message here");
-    			p2_nodes.forEach(detach_dev);
-    			div2_nodes.forEach(detach_dev);
-    			t13 = claim_space(div6_nodes);
-    			div3 = claim_element(div6_nodes, "DIV", { class: true });
-    			var div3_nodes = children(div3);
-    			h43 = claim_element(div3_nodes, "H4", { class: true });
-    			var h43_nodes = children(h43);
-    			t14 = claim_text(h43_nodes, "Username");
-    			h43_nodes.forEach(detach_dev);
-    			t15 = claim_space(div3_nodes);
-    			p3 = claim_element(div3_nodes, "P", { class: true });
-    			var p3_nodes = children(p3);
-    			t16 = claim_text(p3_nodes, "Message here");
-    			p3_nodes.forEach(detach_dev);
-    			div3_nodes.forEach(detach_dev);
-    			t17 = claim_space(div6_nodes);
-    			div4 = claim_element(div6_nodes, "DIV", { class: true });
-    			var div4_nodes = children(div4);
-    			h44 = claim_element(div4_nodes, "H4", { class: true });
-    			var h44_nodes = children(h44);
-    			t18 = claim_text(h44_nodes, "Username");
-    			h44_nodes.forEach(detach_dev);
-    			t19 = claim_space(div4_nodes);
-    			p4 = claim_element(div4_nodes, "P", { class: true });
-    			var p4_nodes = children(p4);
-    			t20 = claim_text(p4_nodes, "Message here");
-    			p4_nodes.forEach(detach_dev);
-    			div4_nodes.forEach(detach_dev);
-    			t21 = claim_space(div6_nodes);
-    			div5 = claim_element(div6_nodes, "DIV", { class: true });
-    			var div5_nodes = children(div5);
-    			h45 = claim_element(div5_nodes, "H4", { class: true });
-    			var h45_nodes = children(h45);
-    			t22 = claim_text(h45_nodes, "Username");
-    			h45_nodes.forEach(detach_dev);
-    			t23 = claim_space(div5_nodes);
-    			p5 = claim_element(div5_nodes, "P", { class: true });
-    			var p5_nodes = children(p5);
-    			t24 = claim_text(p5_nodes, "Message here");
-    			p5_nodes.forEach(detach_dev);
-    			div5_nodes.forEach(detach_dev);
-    			div6_nodes.forEach(detach_dev);
-    			t25 = claim_space(nodes);
-    			div7 = claim_element(nodes, "DIV", { class: true });
-    			var div7_nodes = children(div7);
-    			fieldset = claim_element(div7_nodes, "FIELDSET", { contenteditable: true, class: true });
-    			children(fieldset).forEach(detach_dev);
-    			t26 = claim_space(div7_nodes);
 
-    			svg = claim_svg_element(div7_nodes, "svg", {
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].l(div0_nodes);
+    			}
+
+    			div0_nodes.forEach(detach_dev);
+    			t2 = claim_space(nodes);
+    			div1 = claim_element(nodes, "DIV", { class: true });
+    			var div1_nodes = children(div1);
+    			fieldset = claim_element(div1_nodes, "FIELDSET", { contenteditable: true, class: true });
+    			children(fieldset).forEach(detach_dev);
+    			t3 = claim_space(div1_nodes);
+
+    			svg = claim_svg_element(div1_nodes, "svg", {
     				xmlns: true,
     				width: true,
     				height: true,
@@ -4038,135 +4001,91 @@ var Index = (function () {
 
     			children(path).forEach(detach_dev);
     			svg_nodes.forEach(detach_dev);
-    			div7_nodes.forEach(detach_dev);
+    			div1_nodes.forEach(detach_dev);
     			this.h();
     		},
     		h: function hydrate() {
     			attr_dev(h1, "class", "svelte-127bm7n");
-    			add_location(h1, file$1, 198, 0, 3959);
-    			attr_dev(h40, "class", "svelte-127bm7n");
-    			add_location(h40, file$1, 202, 8, 4043);
-    			attr_dev(p0, "class", "svelte-127bm7n");
-    			add_location(p0, file$1, 203, 8, 4070);
-    			attr_dev(div0, "class", "client-message svelte-127bm7n");
-    			add_location(div0, file$1, 201, 4, 4005);
-    			attr_dev(h41, "class", "svelte-127bm7n");
-    			add_location(h41, file$1, 206, 8, 4145);
-    			attr_dev(p1, "class", "svelte-127bm7n");
-    			add_location(p1, file$1, 207, 8, 4172);
-    			attr_dev(div1, "class", "client-message svelte-127bm7n");
-    			add_location(div1, file$1, 205, 4, 4107);
-    			attr_dev(h42, "class", "svelte-127bm7n");
-    			add_location(h42, file$1, 210, 8, 4247);
-    			attr_dev(p2, "class", "svelte-127bm7n");
-    			add_location(p2, file$1, 211, 8, 4274);
-    			attr_dev(div2, "class", "client-message svelte-127bm7n");
-    			add_location(div2, file$1, 209, 4, 4209);
-    			attr_dev(h43, "class", "svelte-127bm7n");
-    			add_location(h43, file$1, 214, 8, 4349);
-    			attr_dev(p3, "class", "svelte-127bm7n");
-    			add_location(p3, file$1, 215, 8, 4376);
-    			attr_dev(div3, "class", "client-message svelte-127bm7n");
-    			add_location(div3, file$1, 213, 4, 4311);
-    			attr_dev(h44, "class", "svelte-127bm7n");
-    			add_location(h44, file$1, 218, 8, 4451);
-    			attr_dev(p4, "class", "svelte-127bm7n");
-    			add_location(p4, file$1, 219, 8, 4478);
-    			attr_dev(div4, "class", "client-message svelte-127bm7n");
-    			add_location(div4, file$1, 217, 4, 4413);
-    			attr_dev(h45, "class", "svelte-127bm7n");
-    			add_location(h45, file$1, 222, 8, 4553);
-    			attr_dev(p5, "class", "svelte-127bm7n");
-    			add_location(p5, file$1, 223, 8, 4580);
-    			attr_dev(div5, "class", "client-message svelte-127bm7n");
-    			add_location(div5, file$1, 221, 4, 4515);
-    			attr_dev(div6, "class", "chat-view svelte-127bm7n");
-    			add_location(div6, file$1, 200, 0, 3976);
+    			add_location(h1, file$1, 233, 0, 4946);
+    			attr_dev(div0, "class", "chat-view svelte-127bm7n");
+    			add_location(div0, file$1, 235, 0, 4963);
     			attr_dev(fieldset, "contenteditable", "true");
     			attr_dev(fieldset, "class", "svelte-127bm7n");
-    			if (/*newMessage*/ ctx[0] === void 0) add_render_callback(() => /*fieldset_input_handler*/ ctx[1].call(fieldset));
-    			add_location(fieldset, file$1, 228, 4, 4654);
+    			if (/*newMessage*/ ctx[1] === void 0) add_render_callback(() => /*fieldset_input_handler*/ ctx[3].call(fieldset));
+    			add_location(fieldset, file$1, 245, 4, 5218);
     			attr_dev(path, "id", "Path_3");
     			attr_dev(path, "data-name", "Path 3");
     			attr_dev(path, "d", "M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z");
     			attr_dev(path, "transform", "translate(-0.01 0.031)");
     			attr_dev(path, "fill", "#1e88e5");
-    			add_location(path, file$1, 230, 8, 4834);
+    			add_location(path, file$1, 247, 8, 5429);
     			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg, "width", "49.369");
     			attr_dev(svg, "height", "49.384");
     			attr_dev(svg, "viewBox", "0 0 49.369 49.384");
     			attr_dev(svg, "class", "svelte-127bm7n");
-    			add_location(svg, file$1, 229, 4, 4725);
-    			attr_dev(div7, "class", "message-box svelte-127bm7n");
-    			add_location(div7, file$1, 227, 0, 4623);
+    			add_location(svg, file$1, 246, 4, 5289);
+    			attr_dev(div1, "class", "message-box svelte-127bm7n");
+    			add_location(div1, file$1, 244, 0, 5187);
     		},
     		m: function mount(target, anchor) {
     			insert_hydration_dev(target, h1, anchor);
     			append_hydration_dev(h1, t0);
     			insert_hydration_dev(target, t1, anchor);
-    			insert_hydration_dev(target, div6, anchor);
-    			append_hydration_dev(div6, div0);
-    			append_hydration_dev(div0, h40);
-    			append_hydration_dev(h40, t2);
-    			append_hydration_dev(div0, t3);
-    			append_hydration_dev(div0, p0);
-    			append_hydration_dev(p0, t4);
-    			append_hydration_dev(div6, t5);
-    			append_hydration_dev(div6, div1);
-    			append_hydration_dev(div1, h41);
-    			append_hydration_dev(h41, t6);
-    			append_hydration_dev(div1, t7);
-    			append_hydration_dev(div1, p1);
-    			append_hydration_dev(p1, t8);
-    			append_hydration_dev(div6, t9);
-    			append_hydration_dev(div6, div2);
-    			append_hydration_dev(div2, h42);
-    			append_hydration_dev(h42, t10);
-    			append_hydration_dev(div2, t11);
-    			append_hydration_dev(div2, p2);
-    			append_hydration_dev(p2, t12);
-    			append_hydration_dev(div6, t13);
-    			append_hydration_dev(div6, div3);
-    			append_hydration_dev(div3, h43);
-    			append_hydration_dev(h43, t14);
-    			append_hydration_dev(div3, t15);
-    			append_hydration_dev(div3, p3);
-    			append_hydration_dev(p3, t16);
-    			append_hydration_dev(div6, t17);
-    			append_hydration_dev(div6, div4);
-    			append_hydration_dev(div4, h44);
-    			append_hydration_dev(h44, t18);
-    			append_hydration_dev(div4, t19);
-    			append_hydration_dev(div4, p4);
-    			append_hydration_dev(p4, t20);
-    			append_hydration_dev(div6, t21);
-    			append_hydration_dev(div6, div5);
-    			append_hydration_dev(div5, h45);
-    			append_hydration_dev(h45, t22);
-    			append_hydration_dev(div5, t23);
-    			append_hydration_dev(div5, p5);
-    			append_hydration_dev(p5, t24);
-    			insert_hydration_dev(target, t25, anchor);
-    			insert_hydration_dev(target, div7, anchor);
-    			append_hydration_dev(div7, fieldset);
+    			insert_hydration_dev(target, div0, anchor);
 
-    			if (/*newMessage*/ ctx[0] !== void 0) {
-    				fieldset.textContent = /*newMessage*/ ctx[0];
+    			for (let i = 0; i < each_blocks.length; i += 1) {
+    				each_blocks[i].m(div0, null);
     			}
 
-    			append_hydration_dev(div7, t26);
-    			append_hydration_dev(div7, svg);
+    			insert_hydration_dev(target, t2, anchor);
+    			insert_hydration_dev(target, div1, anchor);
+    			append_hydration_dev(div1, fieldset);
+
+    			if (/*newMessage*/ ctx[1] !== void 0) {
+    				fieldset.textContent = /*newMessage*/ ctx[1];
+    			}
+
+    			append_hydration_dev(div1, t3);
+    			append_hydration_dev(div1, svg);
     			append_hydration_dev(svg, path);
 
     			if (!mounted) {
-    				dispose = listen_dev(fieldset, "input", /*fieldset_input_handler*/ ctx[1]);
+    				dispose = [
+    					listen_dev(fieldset, "input", /*fieldset_input_handler*/ ctx[3]),
+    					listen_dev(svg, "click", /*click_handler*/ ctx[4], false, false, false)
+    				];
+
     				mounted = true;
     			}
     		},
     		p: function update(ctx, [dirty]) {
-    			if (dirty & /*newMessage*/ 1 && /*newMessage*/ ctx[0] !== fieldset.textContent) {
-    				fieldset.textContent = /*newMessage*/ ctx[0];
+    			if (dirty & /*chatHistory*/ 1) {
+    				each_value = /*chatHistory*/ ctx[0];
+    				validate_each_argument(each_value);
+    				let i;
+
+    				for (i = 0; i < each_value.length; i += 1) {
+    					const child_ctx = get_each_context(ctx, each_value, i);
+
+    					if (each_blocks[i]) {
+    						each_blocks[i].p(child_ctx, dirty);
+    					} else {
+    						each_blocks[i] = create_each_block(child_ctx);
+    						each_blocks[i].c();
+    						each_blocks[i].m(div0, null);
+    					}
+    				}
+
+    				for (; i < each_blocks.length; i += 1) {
+    					each_blocks[i].d(1);
+    				}
+
+    				each_blocks.length = each_value.length;
+    			}
+
+    			if (dirty & /*newMessage*/ 2 && /*newMessage*/ ctx[1] !== fieldset.textContent) {
+    				fieldset.textContent = /*newMessage*/ ctx[1];
     			}
     		},
     		i: noop,
@@ -4174,11 +4093,12 @@ var Index = (function () {
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(h1);
     			if (detaching) detach_dev(t1);
-    			if (detaching) detach_dev(div6);
-    			if (detaching) detach_dev(t25);
-    			if (detaching) detach_dev(div7);
+    			if (detaching) detach_dev(div0);
+    			destroy_each(each_blocks, detaching);
+    			if (detaching) detach_dev(t2);
+    			if (detaching) detach_dev(div1);
     			mounted = false;
-    			dispose();
+    			run_all(dispose);
     		}
     	};
 
@@ -4197,34 +4117,59 @@ var Index = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Chat', slots, []);
     	const socket = lookup("localhost:3002");
+    	let { chatHistory = [] } = $$props;
 
     	// Client socket callback that occurs on connection to server. 
     	socket.on("connect", () => {
-    		
-    	}); // either with send()  socket.send("Hello!");
-    	// or with emit() and custom event names 
-    	//let clientConnected = `CLIENT connected from ...`;
-    	//socket.emit("clientConnect", clientConnected);
+    		// either with send()  socket.send("Hello!");
+    		// or with emit() and custom event names 
+    		//let clientConnected = `CLIENT connected from ...`;
+    		//socket.emit("clientConnect", clientConnected);
+    		console.log("Connected to server");
 
-    	// Client socket listening to specific key emit from server socket
-    	//socket.on("world", (elem1) => {
-    	//    console.log(elem1);
-    	//});
+    		// Client socket listening to specific key emit from server socket
+    		socket.on("serverMessage", (user, msg) => {
+    			AddMessage(user, msg);
+
+    			// Force update so reactivity works
+    			$$invalidate(0, chatHistory);
+    		});
+    	});
+
+    	const AddMessage = (user, msg) => {
+    		let chatObj = { user, msg };
+    		chatHistory.push(chatObj);
+
+    		// Clientside logging
+    		console.log("Client Message: " + msg);
+    	};
+
     	let username = "Guest";
-
     	let newMessage = "";
-    	let chatHistory = [];
 
-    	const TestData = async () => {
-    		let response = await fetch("/test");
-    		if (!response.ok) return console.error("ERROR FETCH");
-    	};
+    	/* Example request for a server emit
+    const TestData = async() => {
+        let response = await fetch("/test");
+        if(!response.ok) return console.error("ERROR FETCH");
+    }
+    */
+    	//socket.emit("clientMessage", newMessage);
+    	const SendMessage = async () => {
+    		let msgObj = { username, newMessage };
 
-    	const SendMessage = () => {
-    		socket.emit("clientMessage", newMessage);
-    	};
+    		let response = await fetch("/chat/message", {
+    			method: "POST",
+    			headers: {
+    				"Content-Type": "application/json;charset=utf-8"
+    			},
+    			body: JSON.stringify(msgObj)
+    		});
 
-    	const writable_props = [];
+    		if (!response.ok) return console.error("Could not send message!");
+    		response.text();
+    	}; //console.log(result);
+
+    	const writable_props = ['chatHistory'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<Chat> was created with unknown prop '${key}'`);
@@ -4232,36 +4177,46 @@ var Index = (function () {
 
     	function fieldset_input_handler() {
     		newMessage = this.textContent;
-    		$$invalidate(0, newMessage);
+    		$$invalidate(1, newMessage);
     	}
+
+    	const click_handler = () => SendMessage();
+
+    	$$self.$$set = $$props => {
+    		if ('chatHistory' in $$props) $$invalidate(0, chatHistory = $$props.chatHistory);
+    	};
 
     	$$self.$capture_state = () => ({
     		io: lookup,
     		socket,
+    		chatHistory,
+    		AddMessage,
     		username,
     		newMessage,
-    		chatHistory,
-    		TestData,
     		SendMessage
     	});
 
     	$$self.$inject_state = $$props => {
+    		if ('chatHistory' in $$props) $$invalidate(0, chatHistory = $$props.chatHistory);
     		if ('username' in $$props) username = $$props.username;
-    		if ('newMessage' in $$props) $$invalidate(0, newMessage = $$props.newMessage);
-    		if ('chatHistory' in $$props) chatHistory = $$props.chatHistory;
+    		if ('newMessage' in $$props) $$invalidate(1, newMessage = $$props.newMessage);
     	};
 
     	if ($$props && "$$inject" in $$props) {
     		$$self.$inject_state($$props.$$inject);
     	}
 
-    	return [newMessage, fieldset_input_handler];
+    	$$self.$$.update = () => {
+    		if ($$self.$$.dirty & /*chatHistory*/ 1) ;
+    	};
+
+    	return [chatHistory, newMessage, SendMessage, fieldset_input_handler, click_handler];
     }
 
     class Chat extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance$1, create_fragment$1, safe_not_equal, {});
+    		init(this, options, instance$1, create_fragment$1, safe_not_equal, { chatHistory: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -4269,6 +4224,14 @@ var Index = (function () {
     			options,
     			id: create_fragment$1.name
     		});
+    	}
+
+    	get chatHistory() {
+    		throw new Error("<Chat>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set chatHistory(value) {
+    		throw new Error("<Chat>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 
@@ -4284,7 +4247,11 @@ var Index = (function () {
     	let a;
     	let t2;
     	let current;
-    	chat = new Chat({ $$inline: true });
+
+    	chat = new Chat({
+    			props: { chatHistory: /*chatHistory*/ ctx[0] },
+    			$$inline: true
+    		});
 
     	const block = {
     		c: function create() {
@@ -4314,14 +4281,14 @@ var Index = (function () {
     			this.h();
     		},
     		h: function hydrate() {
-    			attr_dev(main, "class", "svelte-j8l67r");
-    			add_location(main, file, 35, 0, 578);
+    			attr_dev(main, "class", "svelte-1w3n4eh");
+    			add_location(main, file, 47, 0, 796);
     			attr_dev(a, "href", "https://ignurof.xyz");
     			attr_dev(a, "target", "_blank");
-    			attr_dev(a, "class", "svelte-j8l67r");
-    			add_location(a, file, 39, 21, 640);
-    			attr_dev(footer, "class", "svelte-j8l67r");
-    			add_location(footer, file, 38, 0, 609);
+    			attr_dev(a, "class", "svelte-1w3n4eh");
+    			add_location(a, file, 51, 21, 871);
+    			attr_dev(footer, "class", "svelte-1w3n4eh");
+    			add_location(footer, file, 50, 0, 840);
     		},
     		m: function mount(target, anchor) {
     			insert_hydration_dev(target, main, anchor);
@@ -4333,7 +4300,11 @@ var Index = (function () {
     			append_hydration_dev(a, t2);
     			current = true;
     		},
-    		p: noop,
+    		p: function update(ctx, [dirty]) {
+    			const chat_changes = {};
+    			if (dirty & /*chatHistory*/ 1) chat_changes.chatHistory = /*chatHistory*/ ctx[0];
+    			chat.$set(chat_changes);
+    		},
     		i: function intro(local) {
     			if (current) return;
     			transition_in(chat.$$.fragment, local);
@@ -4365,20 +4336,34 @@ var Index = (function () {
     function instance($$self, $$props, $$invalidate) {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Routes', slots, []);
-    	const writable_props = [];
+    	let { chatHistory = [] } = $$props;
+    	const writable_props = ['chatHistory'];
 
     	Object.keys($$props).forEach(key => {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console.warn(`<Routes> was created with unknown prop '${key}'`);
     	});
 
-    	$$self.$capture_state = () => ({ Chat });
-    	return [];
+    	$$self.$$set = $$props => {
+    		if ('chatHistory' in $$props) $$invalidate(0, chatHistory = $$props.chatHistory);
+    	};
+
+    	$$self.$capture_state = () => ({ Chat, chatHistory });
+
+    	$$self.$inject_state = $$props => {
+    		if ('chatHistory' in $$props) $$invalidate(0, chatHistory = $$props.chatHistory);
+    	};
+
+    	if ($$props && "$$inject" in $$props) {
+    		$$self.$inject_state($$props.$$inject);
+    	}
+
+    	return [chatHistory];
     }
 
     class Routes extends SvelteComponentDev {
     	constructor(options) {
     		super(options);
-    		init(this, options, instance, create_fragment, safe_not_equal, {});
+    		init(this, options, instance, create_fragment, safe_not_equal, { chatHistory: 0 });
 
     		dispatch_dev("SvelteRegisterComponent", {
     			component: this,
@@ -4386,6 +4371,14 @@ var Index = (function () {
     			options,
     			id: create_fragment.name
     		});
+    	}
+
+    	get chatHistory() {
+    		throw new Error("<Routes>: Props cannot be read directly from the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
+    	}
+
+    	set chatHistory(value) {
+    		throw new Error("<Routes>: Props cannot be set directly on the component instance unless compiling with 'accessors: true' or '<svelte:options accessors/>'");
     	}
     }
 

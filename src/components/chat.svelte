@@ -2,32 +2,67 @@
     import { io } from "socket.io-client";
     const socket = io("localhost:3002");
 
+    export let chatHistory = [];
+
     // Client socket callback that occurs on connection to server. 
     socket.on("connect", () => {
         // either with send()  socket.send("Hello!");
         // or with emit() and custom event names 
         //let clientConnected = `CLIENT connected from ...`;
         //socket.emit("clientConnect", clientConnected);
-        
-        // Client socket listening to specific key emit from server socket
-        //socket.on("world", (elem1) => {
-        //    console.log(elem1);
-        //});
+        console.log("Connected to server");
 
+        // Client socket listening to specific key emit from server socket
+        socket.on("serverMessage", (user, msg) => {
+            AddMessage(user, msg);
+            // Force update so reactivity works
+            chatHistory = chatHistory;
+        });
     });
+
+    const AddMessage = (user, msg) => {
+        let chatObj = {
+            user,
+            msg
+        };
+        chatHistory.push(chatObj);
+        // Clientside logging
+        console.log("Client Message: " + msg);
+    }
 
     let username = "Guest";
     let newMessage = "";
-    let chatHistory = [];
 
+    /* Example request for a server emit
     const TestData = async() => {
         let response = await fetch("/test");
         if(!response.ok) return console.error("ERROR FETCH");
     }
+    */
 
-    const SendMessage = () => {
-        socket.emit("clientMessage", newMessage);
+   //socket.emit("clientMessage", newMessage);
+    const SendMessage = async() => {
+        let msgObj = {
+            username,
+            newMessage
+        };
+
+        let response = await fetch("/chat/message", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json;charset=utf-8"
+            },
+            body: JSON.stringify(msgObj)
+        });
+
+        if(!response.ok) return console.error("Could not send message!");
+
+        let result = response.text();
+        //console.log(result);
     }
+
+    // Reactively update the client-message fields
+    $: chatHistory;
 </script>
 
 <style>
@@ -202,35 +237,17 @@
 <h1>CHAT</h1>
 
 <div class="chat-view">
-    <div class="client-message">
-        <h4>Username</h4>
-        <p>Message here</p>
-    </div>
-    <div class="client-message">
-        <h4>Username</h4>
-        <p>Message here</p>
-    </div>
-    <div class="client-message">
-        <h4>Username</h4>
-        <p>Message here</p>
-    </div>
-    <div class="client-message">
-        <h4>Username</h4>
-        <p>Message here</p>
-    </div>
-    <div class="client-message">
-        <h4>Username</h4>
-        <p>Message here</p>
-    </div>
-    <div class="client-message">
-        <h4>Username</h4>
-        <p>Message here</p>
-    </div>
+    {#each chatHistory as chatMessage, i}
+        <div class="client-message">
+            <h4>{chatMessage.user}</h4>
+            <p>{chatMessage.msg}</p>
+        </div>
+    {/each}
 </div>
 
 <div class="message-box">
     <fieldset contenteditable="true" bind:textContent={newMessage} />
-    <svg xmlns="http://www.w3.org/2000/svg" width="49.369" height="49.384" viewBox="0 0 49.369 49.384">
+    <svg xmlns="http://www.w3.org/2000/svg" width="49.369" height="49.384" viewBox="0 0 49.369 49.384" on:click={() => SendMessage()}>
         <path id="Path_3" data-name="Path 3" d="M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z" transform="translate(-0.01 0.031)" fill="#1e88e5"/>
     </svg>      
 </div>

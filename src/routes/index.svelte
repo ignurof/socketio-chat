@@ -1,5 +1,6 @@
 <script>
     import Chat from "../components/chat.svelte";
+    export let chatHistory = [];
 </script>
 
 <style>
@@ -35,12 +36,21 @@
         main{
             width: 60%;
         }
+
+        footer{
+            background: #00897B;
+            height: 10vh;
+            color: #EFEFEF;
+            text-align: center;
+            padding-top: 1.4em;
+            font-size: 1.4em;
+        }
     }
     
 </style>
 
 <main>
-    <Chat />
+    <Chat {chatHistory}/>
 </main>
 <footer>
     Copyright 2021 - <a href="https://ignurof.xyz" target="_blank">ignurof.xyz</a>

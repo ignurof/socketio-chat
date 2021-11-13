@@ -8,6 +8,9 @@ const config = require("../config.js");
 let app = express();
 const PORT = 3002;
 
+// Router
+const chat = require("./chat.js");
+
 // CORS SETUP
 let corsOptions = {
     "origin": 'chat.ignurof.xyz',
@@ -35,14 +38,11 @@ app.use(express.json());
 
 // Render the response with props before responding
 app.get("/", (req, res, next) => {
-    res.render("index", {
-        // Props here
-    });
+    res.redirect("/chat");
 });
 
-app.get("/test", (req, res, next) => {
-    io.emit("world", "Emit from test route fetch call");
-});
+// Chat endpoint router
+app.use("/chat", chat);
 
 // Socket IO
 const socketio = require("socket.io");
@@ -51,6 +51,9 @@ const server = app.listen(PORT, () => {
     console.log("Server listening on port: " + PORT);
 });
 const io = socketio(server);
+
+// Keep the io instance
+app.set('socketio', io);
 
 // This is what happens when a client connects to ws server
 io.on("connection", (socket) => {
@@ -67,3 +70,4 @@ io.on("connection", (socket) => {
         console.log("CLIENT: " + clientMsg);
     })
 });
+
