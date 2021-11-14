@@ -26,6 +26,41 @@ var Index = (function () {
         return Object.keys(obj).length === 0;
     }
 
+    const is_client = typeof window !== 'undefined';
+    let now = is_client
+        ? () => window.performance.now()
+        : () => Date.now();
+    let raf = is_client ? cb => requestAnimationFrame(cb) : noop;
+
+    const tasks = new Set();
+    function run_tasks(now) {
+        tasks.forEach(task => {
+            if (!task.c(now)) {
+                tasks.delete(task);
+                task.f();
+            }
+        });
+        if (tasks.size !== 0)
+            raf(run_tasks);
+    }
+    /**
+     * Creates a new task that runs on each raf frame
+     * until it returns a falsy value or is aborted
+     */
+    function loop(callback) {
+        let task;
+        if (tasks.size === 0)
+            raf(run_tasks);
+        return {
+            promise: new Promise(fulfill => {
+                tasks.add(task = { c: callback, f: fulfill });
+            }),
+            abort() {
+                tasks.delete(task);
+            }
+        };
+    }
+
     // Track which nodes are claimed during hydration. Unclaimed nodes can then be removed from the DOM
     // at the end of hydration without touching the remaining nodes.
     let is_hydrating = false;
@@ -606,6 +641,273 @@ var Index = (function () {
         $capture_state() { }
         $inject_state() { }
     }
+
+    function cubicInOut(t) {
+        return t < 0.5 ? 4.0 * t * t * t : 0.5 * Math.pow(2.0 * t - 2.0, 3.0) + 1.0;
+    }
+
+    var _ = {
+      $(selector) {
+        if (typeof selector === "string") {
+          return document.querySelector(selector);
+        }
+        return selector;
+      },
+      extend(...args) {
+        return Object.assign(...args);
+      },
+      cumulativeOffset(element) {
+        let top = 0;
+        let left = 0;
+
+        do {
+          top += element.offsetTop || 0;
+          left += element.offsetLeft || 0;
+          element = element.offsetParent;
+        } while (element);
+
+        return {
+          top: top,
+          left: left
+        };
+      },
+      directScroll(element) {
+        return element && element !== document && element !== document.body;
+      },
+      scrollTop(element, value) {
+        let inSetter = value !== undefined;
+        if (this.directScroll(element)) {
+          return inSetter ? (element.scrollTop = value) : element.scrollTop;
+        } else {
+          return inSetter
+            ? (document.documentElement.scrollTop = document.body.scrollTop = value)
+            : window.pageYOffset ||
+                document.documentElement.scrollTop ||
+                document.body.scrollTop ||
+                0;
+        }
+      },
+      scrollLeft(element, value) {
+        let inSetter = value !== undefined;
+        if (this.directScroll(element)) {
+          return inSetter ? (element.scrollLeft = value) : element.scrollLeft;
+        } else {
+          return inSetter
+            ? (document.documentElement.scrollLeft = document.body.scrollLeft = value)
+            : window.pageXOffset ||
+                document.documentElement.scrollLeft ||
+                document.body.scrollLeft ||
+                0;
+        }
+      }
+    };
+
+    const defaultOptions = {
+      container: "body",
+      duration: 500,
+      delay: 0,
+      offset: 0,
+      easing: cubicInOut,
+      onStart: noop,
+      onDone: noop,
+      onAborting: noop,
+      scrollX: false,
+      scrollY: true
+    };
+
+    const _scrollTo = options => {
+      let {
+        offset,
+        duration,
+        delay,
+        easing,
+        x=0,
+        y=0,
+        scrollX,
+        scrollY,
+        onStart,
+        onDone,
+        container,
+        onAborting,
+        element
+      } = options;
+
+      if (typeof offset === "function") {
+        offset = offset();
+      }
+
+      var cumulativeOffsetContainer = _.cumulativeOffset(container);
+      var cumulativeOffsetTarget = element
+        ? _.cumulativeOffset(element)
+        : { top: y, left: x };
+
+      var initialX = _.scrollLeft(container);
+      var initialY = _.scrollTop(container);
+
+      var targetX =
+        cumulativeOffsetTarget.left - cumulativeOffsetContainer.left + offset;
+      var targetY =
+        cumulativeOffsetTarget.top - cumulativeOffsetContainer.top + offset;
+
+      var diffX = targetX - initialX;
+    	var diffY = targetY - initialY;
+
+      let scrolling = true;
+      let started = false;
+      let start_time = now() + delay;
+      let end_time = start_time + duration;
+
+      function scrollToTopLeft(element, top, left) {
+        if (scrollX) _.scrollLeft(element, left);
+        if (scrollY) _.scrollTop(element, top);
+      }
+
+      function start(delayStart) {
+        if (!delayStart) {
+          started = true;
+          onStart(element, {x, y});
+        }
+      }
+
+      function tick(progress) {
+        scrollToTopLeft(
+          container,
+          initialY + diffY * progress,
+          initialX + diffX * progress
+        );
+      }
+
+      function stop() {
+        scrolling = false;
+      }
+
+      loop(now => {
+        if (!started && now >= start_time) {
+          start(false);
+        }
+
+        if (started && now >= end_time) {
+          tick(1);
+          stop();
+          onDone(element, {x, y});
+        }
+
+        if (!scrolling) {
+          onAborting(element, {x, y});
+          return false;
+        }
+        if (started) {
+          const p = now - start_time;
+          const t = 0 + 1 * easing(p / duration);
+          tick(t);
+        }
+
+        return true;
+      });
+
+      start(delay);
+
+      tick(0);
+
+      return stop;
+    };
+
+    const proceedOptions = options => {
+    	let opts = _.extend({}, defaultOptions, options);
+      opts.container = _.$(opts.container);
+      opts.element = _.$(opts.element);
+      return opts;
+    };
+
+    const scrollContainerHeight = containerElement => {
+      if (
+        containerElement &&
+        containerElement !== document &&
+        containerElement !== document.body
+      ) {
+        return containerElement.scrollHeight - containerElement.offsetHeight;
+      } else {
+        let body = document.body;
+        let html = document.documentElement;
+
+        return Math.max(
+          body.scrollHeight,
+          body.offsetHeight,
+          html.clientHeight,
+          html.scrollHeight,
+          html.offsetHeight
+        );
+      }
+    };
+
+    const setGlobalOptions = options => {
+    	_.extend(defaultOptions, options || {});
+    };
+
+    const scrollTo = options => {
+      return _scrollTo(proceedOptions(options));
+    };
+
+    const scrollToBottom = options => {
+      options = proceedOptions(options);
+
+      return _scrollTo(
+        _.extend(options, {
+          element: null,
+          y: scrollContainerHeight(options.container)
+        })
+      );
+    };
+
+    const scrollToTop = options => {
+      options = proceedOptions(options);
+
+      return _scrollTo(
+        _.extend(options, {
+          element: null,
+          y: 0
+        })
+      );
+    };
+
+    const makeScrollToAction = scrollToFunc => {
+      return (node, options) => {
+        let current = options;
+        const handle = e => {
+          e.preventDefault();
+          scrollToFunc(
+            typeof current === "string" ? { element: current } : current
+          );
+        };
+        node.addEventListener("click", handle);
+        node.addEventListener("touchstart", handle);
+        return {
+          update(options) {
+            current = options;
+          },
+          destroy() {
+            node.removeEventListener("click", handle);
+            node.removeEventListener("touchstart", handle);
+          }
+        };
+      };
+    };
+
+    const scrollto = makeScrollToAction(scrollTo);
+    const scrolltotop = makeScrollToAction(scrollToTop);
+    const scrolltobottom = makeScrollToAction(scrollToBottom);
+
+    var animateScroll = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        setGlobalOptions: setGlobalOptions,
+        scrollTo: scrollTo,
+        scrollToBottom: scrollToBottom,
+        scrollToTop: scrollToTop,
+        makeScrollToAction: makeScrollToAction,
+        scrollto: scrollto,
+        scrolltotop: scrolltotop,
+        scrolltobottom: scrolltobottom
+    });
 
     /**
      * Parses an URI
@@ -3846,16 +4148,16 @@ var Index = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[9] = list[i];
-    	child_ctx[11] = i;
+    	child_ctx[10] = list[i];
+    	child_ctx[12] = i;
     	return child_ctx;
     }
 
-    // (225:4) {#each chatHistory as chatMessage, i}
+    // (236:4) {#each chatHistory as chatMessage, i}
     function create_each_block(ctx) {
     	let div;
     	let h4;
-    	let t0_value = /*chatMessage*/ ctx[9].user + "";
+    	let t0_value = /*chatMessage*/ ctx[10].user + "";
     	let t0;
     	let t1;
     	let textarea;
@@ -3888,15 +4190,15 @@ var Index = (function () {
     		},
     		h: function hydrate() {
     			attr_dev(h4, "class", "svelte-mf71fe");
-    			add_location(h4, file$1, 226, 12, 5025);
+    			add_location(h4, file$1, 237, 12, 5308);
     			attr_dev(textarea, "rows", "6");
     			textarea.readOnly = true;
     			attr_dev(textarea, "wrap", "soft");
-    			textarea.value = textarea_value_value = /*chatMessage*/ ctx[9].msg;
+    			textarea.value = textarea_value_value = /*chatMessage*/ ctx[10].msg;
     			attr_dev(textarea, "class", "svelte-mf71fe");
-    			add_location(textarea, file$1, 227, 12, 5066);
+    			add_location(textarea, file$1, 238, 12, 5349);
     			attr_dev(div, "class", "client-message svelte-mf71fe");
-    			add_location(div, file$1, 225, 8, 4983);
+    			add_location(div, file$1, 236, 8, 5266);
     		},
     		m: function mount(target, anchor) {
     			insert_hydration_dev(target, div, anchor);
@@ -3907,9 +4209,9 @@ var Index = (function () {
     			append_hydration_dev(div, t2);
     		},
     		p: function update(ctx, dirty) {
-    			if (dirty & /*chatHistory*/ 1 && t0_value !== (t0_value = /*chatMessage*/ ctx[9].user + "")) set_data_dev(t0, t0_value);
+    			if (dirty & /*chatHistory*/ 1 && t0_value !== (t0_value = /*chatMessage*/ ctx[10].user + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty & /*chatHistory*/ 1 && textarea_value_value !== (textarea_value_value = /*chatMessage*/ ctx[9].msg)) {
+    			if (dirty & /*chatHistory*/ 1 && textarea_value_value !== (textarea_value_value = /*chatMessage*/ ctx[10].msg)) {
     				prop_dev(textarea, "value", textarea_value_value);
     			}
     		},
@@ -3922,7 +4224,7 @@ var Index = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(225:4) {#each chatHistory as chatMessage, i}",
+    		source: "(236:4) {#each chatHistory as chatMessage, i}",
     		ctx
     	});
 
@@ -3975,7 +4277,7 @@ var Index = (function () {
     			t0 = claim_text(h1_nodes, "CHAT");
     			h1_nodes.forEach(detach_dev);
     			t1 = claim_space(nodes);
-    			div0 = claim_element(nodes, "DIV", { class: true });
+    			div0 = claim_element(nodes, "DIV", { class: true, id: true });
     			var div0_nodes = children(div0);
 
     			for (let i = 0; i < each_blocks.length; i += 1) {
@@ -4023,29 +4325,30 @@ var Index = (function () {
     		},
     		h: function hydrate() {
     			attr_dev(h1, "class", "svelte-mf71fe");
-    			add_location(h1, file$1, 221, 0, 4890);
+    			add_location(h1, file$1, 232, 0, 5159);
     			attr_dev(div0, "class", "chat-view svelte-mf71fe");
-    			add_location(div0, file$1, 223, 0, 4907);
+    			attr_dev(div0, "id", "chat-box");
+    			add_location(div0, file$1, 234, 0, 5176);
     			attr_dev(textarea, "maxlength", "240");
     			attr_dev(textarea, "id", "inputbox");
     			attr_dev(textarea, "type", "text");
     			attr_dev(textarea, "wrap", "soft");
     			attr_dev(textarea, "class", "svelte-mf71fe");
-    			add_location(textarea, file$1, 233, 4, 5204);
+    			add_location(textarea, file$1, 244, 4, 5487);
     			attr_dev(path, "id", "Path_3");
     			attr_dev(path, "data-name", "Path 3");
     			attr_dev(path, "d", "M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z");
     			attr_dev(path, "transform", "translate(-0.01 0.031)");
     			attr_dev(path, "fill", "#1e88e5");
-    			add_location(path, file$1, 235, 8, 5459);
+    			add_location(path, file$1, 246, 8, 5742);
     			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg, "width", "49.369");
     			attr_dev(svg, "height", "49.384");
     			attr_dev(svg, "viewBox", "0 0 49.369 49.384");
     			attr_dev(svg, "class", "svelte-mf71fe");
-    			add_location(svg, file$1, 234, 4, 5319);
+    			add_location(svg, file$1, 245, 4, 5602);
     			attr_dev(div1, "class", "message-box svelte-mf71fe");
-    			add_location(div1, file$1, 232, 0, 5173);
+    			add_location(div1, file$1, 243, 0, 5456);
     		},
     		m: function mount(target, anchor) {
     			insert_hydration_dev(target, h1, anchor);
@@ -4133,6 +4436,7 @@ var Index = (function () {
     	let { $$slots: slots = {}, $$scope } = $$props;
     	validate_slots('Chat', slots, []);
     	const socket = lookup("localhost:3002");
+    	setGlobalOptions({ container: "#chat-box", offset: "200" });
     	let { chatHistory = [] } = $$props;
 
     	// Client socket callback that occurs on connection to server. 
@@ -4149,6 +4453,8 @@ var Index = (function () {
 
     			// Force update so reactivity works
     			$$invalidate(0, chatHistory);
+
+    			AutoScroll();
     		});
     	});
 
@@ -4196,6 +4502,10 @@ var Index = (function () {
     		}
     	};
 
+    	const AutoScroll = () => {
+    		scrollToBottom();
+    	};
+
     	const writable_props = ['chatHistory'];
 
     	Object.keys($$props).forEach(key => {
@@ -4214,6 +4524,7 @@ var Index = (function () {
     	};
 
     	$$self.$capture_state = () => ({
+    		animateScroll,
     		io: lookup,
     		socket,
     		chatHistory,
@@ -4221,7 +4532,8 @@ var Index = (function () {
     		username,
     		newMessage,
     		SendMessage,
-    		NewLine
+    		NewLine,
+    		AutoScroll
     	});
 
     	$$self.$inject_state = $$props => {

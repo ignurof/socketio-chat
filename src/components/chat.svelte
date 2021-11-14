@@ -1,6 +1,12 @@
 <script>
+    import * as animateScroll from "svelte-scrollto";
     import { io } from "socket.io-client";
     const socket = io("localhost:3002");
+
+    animateScroll.setGlobalOptions({
+        container: "#chat-box",
+        offset: "200"
+    });
 
     export let chatHistory = [];
 
@@ -17,6 +23,7 @@
             AddMessage(user, msg);
             // Force update so reactivity works
             chatHistory = chatHistory;
+            AutoScroll();
         });
     });
 
@@ -69,6 +76,10 @@
             // Send message
             SendMessage();
         }
+    }
+
+    const AutoScroll = () => {
+        animateScroll.scrollToBottom();
     }
 
     // Reactively update the client-message fields
@@ -227,7 +238,7 @@
 
 <h1>CHAT</h1>
 
-<div class="chat-view">
+<div class="chat-view" id="chat-box">
     {#each chatHistory as chatMessage, i}
         <div class="client-message">
             <h4>{chatMessage.user}</h4>

@@ -1,5 +1,6 @@
 'use strict';
 
+function noop() { }
 function run(fn) {
     return fn();
 }
@@ -8,6 +9,41 @@ function blank_object() {
 }
 function run_all(fns) {
     fns.forEach(run);
+}
+
+const is_client = typeof window !== 'undefined';
+let now = is_client
+    ? () => window.performance.now()
+    : () => Date.now();
+let raf = is_client ? cb => requestAnimationFrame(cb) : noop;
+
+const tasks = new Set();
+function run_tasks(now) {
+    tasks.forEach(task => {
+        if (!task.c(now)) {
+            tasks.delete(task);
+            task.f();
+        }
+    });
+    if (tasks.size !== 0)
+        raf(run_tasks);
+}
+/**
+ * Creates a new task that runs on each raf frame
+ * until it returns a falsy value or is aborted
+ */
+function loop(callback) {
+    let task;
+    if (tasks.size === 0)
+        raf(run_tasks);
+    return {
+        promise: new Promise(fulfill => {
+            tasks.add(task = { c: callback, f: fulfill });
+        }),
+        abort() {
+            tasks.delete(task);
+        }
+    };
 }
 
 let current_component;
@@ -76,6 +112,219 @@ function create_ssr_component(fn) {
         $$render
     };
 }
+
+function cubicInOut(t) {
+    return t < 0.5 ? 4.0 * t * t * t : 0.5 * Math.pow(2.0 * t - 2.0, 3.0) + 1.0;
+}
+
+var _ = {
+  $(selector) {
+    if (typeof selector === "string") {
+      return document.querySelector(selector);
+    }
+    return selector;
+  },
+  extend(...args) {
+    return Object.assign(...args);
+  },
+  cumulativeOffset(element) {
+    let top = 0;
+    let left = 0;
+
+    do {
+      top += element.offsetTop || 0;
+      left += element.offsetLeft || 0;
+      element = element.offsetParent;
+    } while (element);
+
+    return {
+      top: top,
+      left: left
+    };
+  },
+  directScroll(element) {
+    return element && element !== document && element !== document.body;
+  },
+  scrollTop(element, value) {
+    let inSetter = value !== undefined;
+    if (this.directScroll(element)) {
+      return inSetter ? (element.scrollTop = value) : element.scrollTop;
+    } else {
+      return inSetter
+        ? (document.documentElement.scrollTop = document.body.scrollTop = value)
+        : window.pageYOffset ||
+            document.documentElement.scrollTop ||
+            document.body.scrollTop ||
+            0;
+    }
+  },
+  scrollLeft(element, value) {
+    let inSetter = value !== undefined;
+    if (this.directScroll(element)) {
+      return inSetter ? (element.scrollLeft = value) : element.scrollLeft;
+    } else {
+      return inSetter
+        ? (document.documentElement.scrollLeft = document.body.scrollLeft = value)
+        : window.pageXOffset ||
+            document.documentElement.scrollLeft ||
+            document.body.scrollLeft ||
+            0;
+    }
+  }
+};
+
+const defaultOptions = {
+  container: "body",
+  duration: 500,
+  delay: 0,
+  offset: 0,
+  easing: cubicInOut,
+  onStart: noop,
+  onDone: noop,
+  onAborting: noop,
+  scrollX: false,
+  scrollY: true
+};
+
+const _scrollTo = options => {
+  let {
+    offset,
+    duration,
+    delay,
+    easing,
+    x=0,
+    y=0,
+    scrollX,
+    scrollY,
+    onStart,
+    onDone,
+    container,
+    onAborting,
+    element
+  } = options;
+
+  if (typeof offset === "function") {
+    offset = offset();
+  }
+
+  var cumulativeOffsetContainer = _.cumulativeOffset(container);
+  var cumulativeOffsetTarget = element
+    ? _.cumulativeOffset(element)
+    : { top: y, left: x };
+
+  var initialX = _.scrollLeft(container);
+  var initialY = _.scrollTop(container);
+
+  var targetX =
+    cumulativeOffsetTarget.left - cumulativeOffsetContainer.left + offset;
+  var targetY =
+    cumulativeOffsetTarget.top - cumulativeOffsetContainer.top + offset;
+
+  var diffX = targetX - initialX;
+	var diffY = targetY - initialY;
+
+  let scrolling = true;
+  let started = false;
+  let start_time = now() + delay;
+  let end_time = start_time + duration;
+
+  function scrollToTopLeft(element, top, left) {
+    if (scrollX) _.scrollLeft(element, left);
+    if (scrollY) _.scrollTop(element, top);
+  }
+
+  function start(delayStart) {
+    if (!delayStart) {
+      started = true;
+      onStart(element, {x, y});
+    }
+  }
+
+  function tick(progress) {
+    scrollToTopLeft(
+      container,
+      initialY + diffY * progress,
+      initialX + diffX * progress
+    );
+  }
+
+  function stop() {
+    scrolling = false;
+  }
+
+  loop(now => {
+    if (!started && now >= start_time) {
+      start(false);
+    }
+
+    if (started && now >= end_time) {
+      tick(1);
+      stop();
+      onDone(element, {x, y});
+    }
+
+    if (!scrolling) {
+      onAborting(element, {x, y});
+      return false;
+    }
+    if (started) {
+      const p = now - start_time;
+      const t = 0 + 1 * easing(p / duration);
+      tick(t);
+    }
+
+    return true;
+  });
+
+  start(delay);
+
+  tick(0);
+
+  return stop;
+};
+
+const proceedOptions = options => {
+	let opts = _.extend({}, defaultOptions, options);
+  opts.container = _.$(opts.container);
+  opts.element = _.$(opts.element);
+  return opts;
+};
+
+const scrollContainerHeight = containerElement => {
+  if (
+    containerElement &&
+    containerElement !== document &&
+    containerElement !== document.body
+  ) {
+    return containerElement.scrollHeight - containerElement.offsetHeight;
+  } else {
+    let body = document.body;
+    let html = document.documentElement;
+
+    return Math.max(
+      body.scrollHeight,
+      body.offsetHeight,
+      html.clientHeight,
+      html.scrollHeight,
+      html.offsetHeight
+    );
+  }
+};
+
+const setGlobalOptions = options => {
+	_.extend(defaultOptions, options || {});
+};
+
+const scrollToBottom = options => {
+  options = proceedOptions(options);
+
+  return _scrollTo(
+    _.extend(options, {
+      element: null,
+      y: scrollContainerHeight(options.container)
+    })
+  );
+};
 
 /**
  * Parses an URI
@@ -3313,11 +3562,12 @@ Object.assign(lookup, {
 
 const css$1 = {
 	code: "@import url(\"https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap\");h1.svelte-mf71fe.svelte-mf71fe{margin:0 auto;margin-top:1em;font-size:64px;color:#FFFFFF}.chat-view.svelte-mf71fe.svelte-mf71fe{background:#FCFCFC;border-radius:8px;width:100%;height:80%;margin-bottom:2em;box-shadow:0px 6px 6px rgba(0, 0, 0, 0.24);overflow-x:hidden;overflow-y:scroll;scrollbar-color:#dfdfdf #f8f8f8}.client-message.svelte-mf71fe.svelte-mf71fe{background:#e4f4f7;width:80%;min-height:14%;max-height:14%;margin:0 auto;margin-top:1em;margin-left:1.6em;border-top-right-radius:4px;border-top-left-radius:0;border-bottom-left-radius:4px;border-bottom-right-radius:4px;padding:0.4em}.client-message.svelte-mf71fe.svelte-mf71fe::before{content:\"\";top:-0.4em;left:-1.4em;position:relative;display:block;width:2em;height:1em;background-color:transparent;border-top:20px solid #e4f4f7;border-left:20px solid transparent}.client-message.svelte-mf71fe.svelte-mf71fe:nth-child(even){background:#1E88E5;border-top-right-radius:0;border-top-left-radius:4px;border-bottom-left-radius:4px;border-bottom-right-radius:4px;margin:0 auto;margin-top:1em;margin-right:1.6em}.client-message.svelte-mf71fe.svelte-mf71fe:nth-child(even)::before{content:\"\";top:-0.4em;left:42em;position:relative;display:block;width:2em;height:1em;background-color:transparent;border-top:20px solid #1E88E5;border-left:20px solid transparent;transform:rotateY(180deg)}h4.svelte-mf71fe.svelte-mf71fe{font-size:1.4em}textarea.svelte-mf71fe.svelte-mf71fe{font-size:1.2em;font-family:\"Rubik\";resize:none;border:0;background:inherit}.client-message.svelte-mf71fe h4.svelte-mf71fe{margin:0;margin-bottom:0.2em;position:relative;top:-1.6em;left:0.4em}.client-message.svelte-mf71fe:nth-child(even) h4.svelte-mf71fe{position:relative;left:28.2em}.client-message.svelte-mf71fe textarea.svelte-mf71fe{margin:0;position:relative;top:-1.8em;left:0.4em;width:80%;max-height:80%;overflow:hidden}.client-message.svelte-mf71fe:nth-child(even) textarea.svelte-mf71fe{position:relative;left:7em}.message-box.svelte-mf71fe.svelte-mf71fe{display:flex;flex-direction:row;background:#FCFCFC;border-radius:8px;width:100%;height:6em;box-shadow:0px 6px 6px rgba(0, 0, 0, 0.24)}.message-box.svelte-mf71fe textarea.svelte-mf71fe{border:2px solid #d7e3e4;border-radius:8px;background:#EBF8FA;width:90%;height:70%;margin:0.3em;font-size:1.4em;padding:0.3em}.message-box.svelte-mf71fe svg.svelte-mf71fe{margin-left:1em;margin-right:1.4em;margin-top:1.4em;cursor:pointer}",
-	map: "{\"version\":3,\"file\":\"chat.svelte\",\"sources\":[\"chat.svelte\"],\"sourcesContent\":[\"<script>\\r\\n    import { io } from \\\"socket.io-client\\\";\\r\\n    const socket = io(\\\"localhost:3002\\\");\\r\\n\\r\\n    export let chatHistory = [];\\r\\n\\r\\n    // Client socket callback that occurs on connection to server. \\r\\n    socket.on(\\\"connect\\\", () => {\\r\\n        // either with send()  socket.send(\\\"Hello!\\\");\\r\\n        // or with emit() and custom event names \\r\\n        //let clientConnected = `CLIENT connected from ...`;\\r\\n        //socket.emit(\\\"clientConnect\\\", clientConnected);\\r\\n        console.log(\\\"Connected to server\\\");\\r\\n\\r\\n        // Client socket listening to specific key emit from server socket\\r\\n        socket.on(\\\"serverMessage\\\", (user, msg) => {\\r\\n            AddMessage(user, msg);\\r\\n            // Force update so reactivity works\\r\\n            chatHistory = chatHistory;\\r\\n        });\\r\\n    });\\r\\n\\r\\n    const AddMessage = (user, msg) => {\\r\\n        let chatObj = {\\r\\n            user,\\r\\n            msg\\r\\n        };\\r\\n        chatHistory.push(chatObj);\\r\\n        // Clientside logging\\r\\n        console.log(\\\"Client Message: \\\" + msg);\\r\\n    }\\r\\n\\r\\n    let username = \\\"Guest\\\";\\r\\n    let newMessage = \\\"\\\";\\r\\n\\r\\n   //socket.emit(\\\"clientMessage\\\", newMessage);\\r\\n    const SendMessage = async() => {\\r\\n        let msgObj = {\\r\\n            username,\\r\\n            newMessage\\r\\n        };\\r\\n\\r\\n        if(newMessage.length > 240) return console.error(\\\"Message is too long!\\\");\\r\\n\\r\\n        let response = await fetch(\\\"/chat/message\\\", {\\r\\n            method: \\\"POST\\\",\\r\\n            headers: {\\r\\n                \\\"Content-Type\\\": \\\"application/json;charset=utf-8\\\"\\r\\n            },\\r\\n            body: JSON.stringify(msgObj)\\r\\n        });\\r\\n\\r\\n        if(!response.ok) return console.error(\\\"Could not send message!\\\");\\r\\n\\r\\n        let result = response.text();\\r\\n        //console.log(result);\\r\\n        // Reset inputfield value\\r\\n        newMessage = \\\"\\\";\\r\\n    }\\r\\n\\r\\n    // Handles key events on inputbox, like pressing enter to send message\\r\\n    const NewLine = (event) => {\\r\\n        // 13 is the keycode for \\\"enter\\\"\\r\\n        if (event.keyCode == 13 && event.shiftKey) {\\r\\n            // Add line break\\r\\n            //newMessage += \\\"\\\\n\\\";\\r\\n        }\\r\\n        if (event.keyCode == 13 && !event.shiftKey) {\\r\\n            // Send message\\r\\n            SendMessage();\\r\\n        }\\r\\n    }\\r\\n\\r\\n    // Reactively update the client-message fields\\r\\n    $: chatHistory;\\r\\n</script>\\r\\n\\r\\n<style>@import url(\\\"https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap\\\");\\nh1 {\\n  margin: 0 auto;\\n  margin-top: 1em;\\n  font-size: 64px;\\n  color: #FFFFFF;\\n}\\n\\n.chat-view {\\n  background: #FCFCFC;\\n  border-radius: 8px;\\n  width: 100%;\\n  height: 80%;\\n  margin-bottom: 2em;\\n  box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);\\n  overflow-x: hidden;\\n  overflow-y: scroll;\\n  scrollbar-color: #dfdfdf #f8f8f8;\\n}\\n\\n.client-message {\\n  background: #e4f4f7;\\n  width: 80%;\\n  min-height: 14%;\\n  max-height: 14%;\\n  margin: 0 auto;\\n  margin-top: 1em;\\n  margin-left: 1.6em;\\n  border-top-right-radius: 4px;\\n  border-top-left-radius: 0;\\n  border-bottom-left-radius: 4px;\\n  border-bottom-right-radius: 4px;\\n  padding: 0.4em;\\n}\\n\\n.client-message::before {\\n  content: \\\"\\\";\\n  top: -0.4em;\\n  left: -1.4em;\\n  position: relative;\\n  display: block;\\n  width: 2em;\\n  height: 1em;\\n  background-color: transparent;\\n  border-top: 20px solid #e4f4f7;\\n  border-left: 20px solid transparent;\\n}\\n\\n.client-message:nth-child(even) {\\n  background: #1E88E5;\\n  border-top-right-radius: 0;\\n  border-top-left-radius: 4px;\\n  border-bottom-left-radius: 4px;\\n  border-bottom-right-radius: 4px;\\n  margin: 0 auto;\\n  margin-top: 1em;\\n  margin-right: 1.6em;\\n}\\n\\n.client-message:nth-child(even)::before {\\n  content: \\\"\\\";\\n  top: -0.4em;\\n  left: 42em;\\n  position: relative;\\n  display: block;\\n  width: 2em;\\n  height: 1em;\\n  background-color: transparent;\\n  border-top: 20px solid #1E88E5;\\n  border-left: 20px solid transparent;\\n  transform: rotateY(180deg);\\n}\\n\\nh4 {\\n  font-size: 1.4em;\\n}\\n\\ntextarea {\\n  font-size: 1.2em;\\n  font-family: \\\"Rubik\\\";\\n  resize: none;\\n  border: 0;\\n  background: inherit;\\n}\\n\\n.client-message h4 {\\n  margin: 0;\\n  margin-bottom: 0.2em;\\n  position: relative;\\n  top: -1.6em;\\n  left: 0.4em;\\n}\\n\\n.client-message:nth-child(even) h4 {\\n  position: relative;\\n  left: 28.2em;\\n}\\n\\n.client-message textarea {\\n  margin: 0;\\n  position: relative;\\n  top: -1.8em;\\n  left: 0.4em;\\n  width: 80%;\\n  max-height: 80%;\\n  overflow: hidden;\\n}\\n\\n.client-message:nth-child(even) textarea {\\n  position: relative;\\n  left: 7em;\\n}\\n\\n.message-box {\\n  display: flex;\\n  flex-direction: row;\\n  background: #FCFCFC;\\n  border-radius: 8px;\\n  width: 100%;\\n  height: 6em;\\n  box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);\\n}\\n\\n.message-box textarea {\\n  border: 2px solid #d7e3e4;\\n  border-radius: 8px;\\n  background: #EBF8FA;\\n  width: 90%;\\n  height: 70%;\\n  margin: 0.3em;\\n  font-size: 1.4em;\\n  padding: 0.3em;\\n}\\n\\n.message-box svg {\\n  margin-left: 1em;\\n  margin-right: 1.4em;\\n  margin-top: 1.4em;\\n  cursor: pointer;\\n}\\n\\n/* RESPONSIVENESS */\\n/* Desktop */</style>\\r\\n\\r\\n<h1>CHAT</h1>\\r\\n\\r\\n<div class=\\\"chat-view\\\">\\r\\n    {#each chatHistory as chatMessage, i}\\r\\n        <div class=\\\"client-message\\\">\\r\\n            <h4>{chatMessage.user}</h4>\\r\\n            <textarea rows=6 readonly wrap=\\\"soft\\\">{chatMessage.msg}</textarea>\\r\\n        </div>\\r\\n    {/each}\\r\\n</div>\\r\\n\\r\\n<div class=\\\"message-box\\\">\\r\\n    <textarea maxlength=240 id=\\\"inputbox\\\" type=\\\"text\\\" bind:value={newMessage} on:keypress={NewLine} wrap=\\\"soft\\\"/>\\r\\n    <svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"49.369\\\" height=\\\"49.384\\\" viewBox=\\\"0 0 49.369 49.384\\\" on:click={() => SendMessage()}>\\r\\n        <path id=\\\"Path_3\\\" data-name=\\\"Path 3\\\" d=\\\"M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z\\\" transform=\\\"translate(-0.01 0.031)\\\" fill=\\\"#1e88e5\\\"/>\\r\\n    </svg>      \\r\\n</div>\\r\\n\"],\"names\":[],\"mappings\":\"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\"}"
+	map: "{\"version\":3,\"file\":\"chat.svelte\",\"sources\":[\"chat.svelte\"],\"sourcesContent\":[\"<script>\\r\\n    import * as animateScroll from \\\"svelte-scrollto\\\";\\r\\n    import { io } from \\\"socket.io-client\\\";\\r\\n    const socket = io(\\\"localhost:3002\\\");\\r\\n\\r\\n    animateScroll.setGlobalOptions({\\r\\n        container: \\\"#chat-box\\\",\\r\\n        offset: \\\"200\\\"\\r\\n    });\\r\\n\\r\\n    export let chatHistory = [];\\r\\n\\r\\n    // Client socket callback that occurs on connection to server. \\r\\n    socket.on(\\\"connect\\\", () => {\\r\\n        // either with send()  socket.send(\\\"Hello!\\\");\\r\\n        // or with emit() and custom event names \\r\\n        //let clientConnected = `CLIENT connected from ...`;\\r\\n        //socket.emit(\\\"clientConnect\\\", clientConnected);\\r\\n        console.log(\\\"Connected to server\\\");\\r\\n\\r\\n        // Client socket listening to specific key emit from server socket\\r\\n        socket.on(\\\"serverMessage\\\", (user, msg) => {\\r\\n            AddMessage(user, msg);\\r\\n            // Force update so reactivity works\\r\\n            chatHistory = chatHistory;\\r\\n            AutoScroll();\\r\\n        });\\r\\n    });\\r\\n\\r\\n    const AddMessage = (user, msg) => {\\r\\n        let chatObj = {\\r\\n            user,\\r\\n            msg\\r\\n        };\\r\\n        chatHistory.push(chatObj);\\r\\n        // Clientside logging\\r\\n        console.log(\\\"Client Message: \\\" + msg);\\r\\n    }\\r\\n\\r\\n    let username = \\\"Guest\\\";\\r\\n    let newMessage = \\\"\\\";\\r\\n\\r\\n   //socket.emit(\\\"clientMessage\\\", newMessage);\\r\\n    const SendMessage = async() => {\\r\\n        let msgObj = {\\r\\n            username,\\r\\n            newMessage\\r\\n        };\\r\\n\\r\\n        if(newMessage.length > 240) return console.error(\\\"Message is too long!\\\");\\r\\n\\r\\n        let response = await fetch(\\\"/chat/message\\\", {\\r\\n            method: \\\"POST\\\",\\r\\n            headers: {\\r\\n                \\\"Content-Type\\\": \\\"application/json;charset=utf-8\\\"\\r\\n            },\\r\\n            body: JSON.stringify(msgObj)\\r\\n        });\\r\\n\\r\\n        if(!response.ok) return console.error(\\\"Could not send message!\\\");\\r\\n\\r\\n        let result = response.text();\\r\\n        //console.log(result);\\r\\n        // Reset inputfield value\\r\\n        newMessage = \\\"\\\";\\r\\n    }\\r\\n\\r\\n    // Handles key events on inputbox, like pressing enter to send message\\r\\n    const NewLine = (event) => {\\r\\n        // 13 is the keycode for \\\"enter\\\"\\r\\n        if (event.keyCode == 13 && event.shiftKey) {\\r\\n            // Add line break\\r\\n            //newMessage += \\\"\\\\n\\\";\\r\\n        }\\r\\n        if (event.keyCode == 13 && !event.shiftKey) {\\r\\n            // Send message\\r\\n            SendMessage();\\r\\n        }\\r\\n    }\\r\\n\\r\\n    const AutoScroll = () => {\\r\\n        animateScroll.scrollToBottom();\\r\\n    }\\r\\n\\r\\n    // Reactively update the client-message fields\\r\\n    $: chatHistory;\\r\\n</script>\\r\\n\\r\\n<style>@import url(\\\"https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap\\\");\\nh1 {\\n  margin: 0 auto;\\n  margin-top: 1em;\\n  font-size: 64px;\\n  color: #FFFFFF;\\n}\\n\\n.chat-view {\\n  background: #FCFCFC;\\n  border-radius: 8px;\\n  width: 100%;\\n  height: 80%;\\n  margin-bottom: 2em;\\n  box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);\\n  overflow-x: hidden;\\n  overflow-y: scroll;\\n  scrollbar-color: #dfdfdf #f8f8f8;\\n}\\n\\n.client-message {\\n  background: #e4f4f7;\\n  width: 80%;\\n  min-height: 14%;\\n  max-height: 14%;\\n  margin: 0 auto;\\n  margin-top: 1em;\\n  margin-left: 1.6em;\\n  border-top-right-radius: 4px;\\n  border-top-left-radius: 0;\\n  border-bottom-left-radius: 4px;\\n  border-bottom-right-radius: 4px;\\n  padding: 0.4em;\\n}\\n\\n.client-message::before {\\n  content: \\\"\\\";\\n  top: -0.4em;\\n  left: -1.4em;\\n  position: relative;\\n  display: block;\\n  width: 2em;\\n  height: 1em;\\n  background-color: transparent;\\n  border-top: 20px solid #e4f4f7;\\n  border-left: 20px solid transparent;\\n}\\n\\n.client-message:nth-child(even) {\\n  background: #1E88E5;\\n  border-top-right-radius: 0;\\n  border-top-left-radius: 4px;\\n  border-bottom-left-radius: 4px;\\n  border-bottom-right-radius: 4px;\\n  margin: 0 auto;\\n  margin-top: 1em;\\n  margin-right: 1.6em;\\n}\\n\\n.client-message:nth-child(even)::before {\\n  content: \\\"\\\";\\n  top: -0.4em;\\n  left: 42em;\\n  position: relative;\\n  display: block;\\n  width: 2em;\\n  height: 1em;\\n  background-color: transparent;\\n  border-top: 20px solid #1E88E5;\\n  border-left: 20px solid transparent;\\n  transform: rotateY(180deg);\\n}\\n\\nh4 {\\n  font-size: 1.4em;\\n}\\n\\ntextarea {\\n  font-size: 1.2em;\\n  font-family: \\\"Rubik\\\";\\n  resize: none;\\n  border: 0;\\n  background: inherit;\\n}\\n\\n.client-message h4 {\\n  margin: 0;\\n  margin-bottom: 0.2em;\\n  position: relative;\\n  top: -1.6em;\\n  left: 0.4em;\\n}\\n\\n.client-message:nth-child(even) h4 {\\n  position: relative;\\n  left: 28.2em;\\n}\\n\\n.client-message textarea {\\n  margin: 0;\\n  position: relative;\\n  top: -1.8em;\\n  left: 0.4em;\\n  width: 80%;\\n  max-height: 80%;\\n  overflow: hidden;\\n}\\n\\n.client-message:nth-child(even) textarea {\\n  position: relative;\\n  left: 7em;\\n}\\n\\n.message-box {\\n  display: flex;\\n  flex-direction: row;\\n  background: #FCFCFC;\\n  border-radius: 8px;\\n  width: 100%;\\n  height: 6em;\\n  box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);\\n}\\n\\n.message-box textarea {\\n  border: 2px solid #d7e3e4;\\n  border-radius: 8px;\\n  background: #EBF8FA;\\n  width: 90%;\\n  height: 70%;\\n  margin: 0.3em;\\n  font-size: 1.4em;\\n  padding: 0.3em;\\n}\\n\\n.message-box svg {\\n  margin-left: 1em;\\n  margin-right: 1.4em;\\n  margin-top: 1.4em;\\n  cursor: pointer;\\n}\\n\\n/* RESPONSIVENESS */\\n/* Desktop */</style>\\r\\n\\r\\n<h1>CHAT</h1>\\r\\n\\r\\n<div class=\\\"chat-view\\\" id=\\\"chat-box\\\">\\r\\n    {#each chatHistory as chatMessage, i}\\r\\n        <div class=\\\"client-message\\\">\\r\\n            <h4>{chatMessage.user}</h4>\\r\\n            <textarea rows=6 readonly wrap=\\\"soft\\\">{chatMessage.msg}</textarea>\\r\\n        </div>\\r\\n    {/each}\\r\\n</div>\\r\\n\\r\\n<div class=\\\"message-box\\\">\\r\\n    <textarea maxlength=240 id=\\\"inputbox\\\" type=\\\"text\\\" bind:value={newMessage} on:keypress={NewLine} wrap=\\\"soft\\\"/>\\r\\n    <svg xmlns=\\\"http://www.w3.org/2000/svg\\\" width=\\\"49.369\\\" height=\\\"49.384\\\" viewBox=\\\"0 0 49.369 49.384\\\" on:click={() => SendMessage()}>\\r\\n        <path id=\\\"Path_3\\\" data-name=\\\"Path 3\\\" d=\\\"M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z\\\" transform=\\\"translate(-0.01 0.031)\\\" fill=\\\"#1e88e5\\\"/>\\r\\n    </svg>      \\r\\n</div>\\r\\n\"],\"names\":[],\"mappings\":\"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\"}"
 };
 
 const Chat = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 	const socket = lookup("localhost:3002");
+	setGlobalOptions({ container: "#chat-box", offset: "200" });
 	let { chatHistory = [] } = $$props;
 
 	// Client socket callback that occurs on connection to server. 
@@ -3334,6 +3584,8 @@ const Chat = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 
 			// Force update so reactivity works
 			chatHistory = chatHistory;
+
+			AutoScroll();
 		});
 	});
 
@@ -3345,12 +3597,16 @@ const Chat = create_ssr_component(($$result, $$props, $$bindings, slots) => {
 		console.log("Client Message: " + msg);
 	};
 
+	const AutoScroll = () => {
+		scrollToBottom();
+	};
+
 	if ($$props.chatHistory === void 0 && $$bindings.chatHistory && chatHistory !== void 0) $$bindings.chatHistory(chatHistory);
 	$$result.css.add(css$1);
 
 	return `<h1 class="${"svelte-mf71fe"}">CHAT</h1>
 
-<div class="${"chat-view svelte-mf71fe"}">${each(chatHistory, (chatMessage, i) => `<div class="${"client-message svelte-mf71fe"}"><h4 class="${"svelte-mf71fe"}">${escape(chatMessage.user)}</h4>
+<div class="${"chat-view svelte-mf71fe"}" id="${"chat-box"}">${each(chatHistory, (chatMessage, i) => `<div class="${"client-message svelte-mf71fe"}"><h4 class="${"svelte-mf71fe"}">${escape(chatMessage.user)}</h4>
             <textarea rows="${"6"}" readonly wrap="${"soft"}" class="${"svelte-mf71fe"}">${escape(chatMessage.msg)}</textarea>
         </div>`)}</div>
 
