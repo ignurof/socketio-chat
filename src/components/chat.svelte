@@ -38,7 +38,7 @@
         console.log("Client Message: " + msg);
     }
 
-    let username = "Guest";
+    let username = "Guest 2";
     let newMessage = "";
 
     const CalculateRows = (inputString) => {
@@ -160,19 +160,24 @@
         border-left: 20px solid transparent;
     }
 
-    .client-message:nth-child(even){
+    .client-message#incoming{
         background: #1E88E5;
-        color: #FFFFFF;
-        border-top-right-radius: 0;
-        border-top-left-radius: 4px;
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
+        color: white;
+        width: 80%;
+        min-height: 10%;
         margin: 0 auto;
         margin-top: 1em;
-        margin-right: 1.6em;
+        margin-left: 1.6em;
+        border-top-right-radius: 4px;
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 4px;
+        border-bottom-right-radius: 4px;
+        padding: .4em;
+        position: relative;
+        left: 6em;
     }
 
-    .client-message:nth-child(even)::before{
+    .client-message#incoming::before{
         content: '';
         top: -.4em;
         left: 42em;
@@ -206,11 +211,6 @@
         left: .4em;
     }
 
-    .client-message:nth-child(even) h4{
-        position: relative;
-        left: 28.2em;
-    }
-
     .client-message textarea{
         color: #000000;
         margin: 0;
@@ -220,10 +220,13 @@
         border: 1px solid red;
     }
 
-    .client-message:nth-child(even) textarea{
+    .client-message#incoming textarea{
         color: #ffffff;
+        margin: 0;
         position: relative;
-        left: 7em;
+        top: -1.8em;
+        left: .4em;
+        border: 1px solid red;
     }
 
     .message-box{
@@ -265,10 +268,17 @@
 
 <div class="chat-view" id="chat-box">
     {#each chatHistory as chatMessage, i}
-        <div class="client-message" >
-            <h4>{chatMessage.user}</h4>
-            <textarea rows={chatMessage.rows} cols=55 readonly wrap="soft" bind:value={chatMessage.msg} />
-        </div>
+        {#if chatMessage.user === username}
+            <div class="client-message" >
+                <h4>{chatMessage.user}</h4>
+                <textarea rows={chatMessage.rows} cols=55 readonly wrap="soft" bind:value={chatMessage.msg} />
+            </div>
+        {:else}
+            <div class="client-message" id="incoming">
+                <h4>{chatMessage.user}</h4>
+                <textarea rows={chatMessage.rows} cols=55 readonly wrap="soft" bind:value={chatMessage.msg} />
+            </div>
+        {/if}
     {/each}
 </div>
 
