@@ -595,10 +595,6 @@ var Index = (function () {
         else
             dispatch_dev('SvelteDOMSetAttribute', { node, attribute, value });
     }
-    function prop_dev(node, property, value) {
-        node[property] = value;
-        dispatch_dev('SvelteDOMSetProperty', { node, property, value });
-    }
     function set_data_dev(text, data) {
         data = '' + data;
         if (text.wholeText === data)
@@ -4148,21 +4144,28 @@ var Index = (function () {
 
     function get_each_context(ctx, list, i) {
     	const child_ctx = ctx.slice();
-    	child_ctx[10] = list[i];
-    	child_ctx[12] = i;
+    	child_ctx[12] = list[i];
+    	child_ctx[13] = list;
+    	child_ctx[14] = i;
     	return child_ctx;
     }
 
-    // (236:4) {#each chatHistory as chatMessage, i}
+    // (261:4) {#each chatHistory as chatMessage, i}
     function create_each_block(ctx) {
     	let div;
     	let h4;
-    	let t0_value = /*chatMessage*/ ctx[10].user + "";
+    	let t0_value = /*chatMessage*/ ctx[12].user + "";
     	let t0;
     	let t1;
     	let textarea;
-    	let textarea_value_value;
+    	let textarea_rows_value;
     	let t2;
+    	let mounted;
+    	let dispose;
+
+    	function textarea_input_handler() {
+    		/*textarea_input_handler*/ ctx[4].call(textarea, /*each_value*/ ctx[13], /*i*/ ctx[14]);
+    	}
 
     	const block = {
     		c: function create() {
@@ -4182,23 +4185,30 @@ var Index = (function () {
     			t0 = claim_text(h4_nodes, t0_value);
     			h4_nodes.forEach(detach_dev);
     			t1 = claim_space(div_nodes);
-    			textarea = claim_element(div_nodes, "TEXTAREA", { rows: true, wrap: true, class: true });
+
+    			textarea = claim_element(div_nodes, "TEXTAREA", {
+    				rows: true,
+    				cols: true,
+    				wrap: true,
+    				class: true
+    			});
+
     			children(textarea).forEach(detach_dev);
     			t2 = claim_space(div_nodes);
     			div_nodes.forEach(detach_dev);
     			this.h();
     		},
     		h: function hydrate() {
-    			attr_dev(h4, "class", "svelte-mf71fe");
-    			add_location(h4, file$1, 237, 12, 5308);
-    			attr_dev(textarea, "rows", "6");
+    			attr_dev(h4, "class", "svelte-bfrt0e");
+    			add_location(h4, file$1, 262, 12, 6001);
+    			attr_dev(textarea, "rows", textarea_rows_value = /*chatMessage*/ ctx[12].rows);
+    			attr_dev(textarea, "cols", "55");
     			textarea.readOnly = true;
     			attr_dev(textarea, "wrap", "soft");
-    			textarea.value = textarea_value_value = /*chatMessage*/ ctx[10].msg;
-    			attr_dev(textarea, "class", "svelte-mf71fe");
-    			add_location(textarea, file$1, 238, 12, 5349);
-    			attr_dev(div, "class", "client-message svelte-mf71fe");
-    			add_location(div, file$1, 236, 8, 5266);
+    			attr_dev(textarea, "class", "svelte-bfrt0e");
+    			add_location(textarea, file$1, 263, 12, 6042);
+    			attr_dev(div, "class", "client-message svelte-bfrt0e");
+    			add_location(div, file$1, 261, 8, 5958);
     		},
     		m: function mount(target, anchor) {
     			insert_hydration_dev(target, div, anchor);
@@ -4206,17 +4216,30 @@ var Index = (function () {
     			append_hydration_dev(h4, t0);
     			append_hydration_dev(div, t1);
     			append_hydration_dev(div, textarea);
+    			set_input_value(textarea, /*chatMessage*/ ctx[12].msg);
     			append_hydration_dev(div, t2);
-    		},
-    		p: function update(ctx, dirty) {
-    			if (dirty & /*chatHistory*/ 1 && t0_value !== (t0_value = /*chatMessage*/ ctx[10].user + "")) set_data_dev(t0, t0_value);
 
-    			if (dirty & /*chatHistory*/ 1 && textarea_value_value !== (textarea_value_value = /*chatMessage*/ ctx[10].msg)) {
-    				prop_dev(textarea, "value", textarea_value_value);
+    			if (!mounted) {
+    				dispose = listen_dev(textarea, "input", textarea_input_handler);
+    				mounted = true;
+    			}
+    		},
+    		p: function update(new_ctx, dirty) {
+    			ctx = new_ctx;
+    			if (dirty & /*chatHistory*/ 1 && t0_value !== (t0_value = /*chatMessage*/ ctx[12].user + "")) set_data_dev(t0, t0_value);
+
+    			if (dirty & /*chatHistory*/ 1 && textarea_rows_value !== (textarea_rows_value = /*chatMessage*/ ctx[12].rows)) {
+    				attr_dev(textarea, "rows", textarea_rows_value);
+    			}
+
+    			if (dirty & /*chatHistory*/ 1) {
+    				set_input_value(textarea, /*chatMessage*/ ctx[12].msg);
     			}
     		},
     		d: function destroy(detaching) {
     			if (detaching) detach_dev(div);
+    			mounted = false;
+    			dispose();
     		}
     	};
 
@@ -4224,7 +4247,7 @@ var Index = (function () {
     		block,
     		id: create_each_block.name,
     		type: "each",
-    		source: "(236:4) {#each chatHistory as chatMessage, i}",
+    		source: "(261:4) {#each chatHistory as chatMessage, i}",
     		ctx
     	});
 
@@ -4324,31 +4347,31 @@ var Index = (function () {
     			this.h();
     		},
     		h: function hydrate() {
-    			attr_dev(h1, "class", "svelte-mf71fe");
-    			add_location(h1, file$1, 232, 0, 5159);
-    			attr_dev(div0, "class", "chat-view svelte-mf71fe");
+    			attr_dev(h1, "class", "svelte-bfrt0e");
+    			add_location(h1, file$1, 257, 0, 5851);
+    			attr_dev(div0, "class", "chat-view svelte-bfrt0e");
     			attr_dev(div0, "id", "chat-box");
-    			add_location(div0, file$1, 234, 0, 5176);
+    			add_location(div0, file$1, 259, 0, 5868);
     			attr_dev(textarea, "maxlength", "240");
     			attr_dev(textarea, "id", "inputbox");
     			attr_dev(textarea, "type", "text");
     			attr_dev(textarea, "wrap", "soft");
-    			attr_dev(textarea, "class", "svelte-mf71fe");
-    			add_location(textarea, file$1, 244, 4, 5487);
+    			attr_dev(textarea, "class", "svelte-bfrt0e");
+    			add_location(textarea, file$1, 269, 4, 6208);
     			attr_dev(path, "id", "Path_3");
     			attr_dev(path, "data-name", "Path 3");
     			attr_dev(path, "d", "M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z");
     			attr_dev(path, "transform", "translate(-0.01 0.031)");
     			attr_dev(path, "fill", "#1e88e5");
-    			add_location(path, file$1, 246, 8, 5742);
+    			add_location(path, file$1, 271, 8, 6463);
     			attr_dev(svg, "xmlns", "http://www.w3.org/2000/svg");
     			attr_dev(svg, "width", "49.369");
     			attr_dev(svg, "height", "49.384");
     			attr_dev(svg, "viewBox", "0 0 49.369 49.384");
-    			attr_dev(svg, "class", "svelte-mf71fe");
-    			add_location(svg, file$1, 245, 4, 5602);
-    			attr_dev(div1, "class", "message-box svelte-mf71fe");
-    			add_location(div1, file$1, 243, 0, 5456);
+    			attr_dev(svg, "class", "svelte-bfrt0e");
+    			add_location(svg, file$1, 270, 4, 6323);
+    			attr_dev(div1, "class", "message-box svelte-bfrt0e");
+    			add_location(div1, file$1, 268, 0, 6177);
     		},
     		m: function mount(target, anchor) {
     			insert_hydration_dev(target, h1, anchor);
@@ -4370,9 +4393,9 @@ var Index = (function () {
 
     			if (!mounted) {
     				dispose = [
-    					listen_dev(textarea, "input", /*textarea_input_handler*/ ctx[4]),
+    					listen_dev(textarea, "input", /*textarea_input_handler_1*/ ctx[5]),
     					listen_dev(textarea, "keypress", /*NewLine*/ ctx[3], false, false, false),
-    					listen_dev(svg, "click", /*click_handler*/ ctx[5], false, false, false)
+    					listen_dev(svg, "click", /*click_handler*/ ctx[6], false, false, false)
     				];
 
     				mounted = true;
@@ -4448,8 +4471,8 @@ var Index = (function () {
     		console.log("Connected to server");
 
     		// Client socket listening to specific key emit from server socket
-    		socket.on("serverMessage", (user, msg) => {
-    			AddMessage(user, msg);
+    		socket.on("serverMessage", (user, msg, rows) => {
+    			AddMessage(user, msg, rows);
 
     			// Force update so reactivity works
     			$$invalidate(0, chatHistory);
@@ -4458,8 +4481,8 @@ var Index = (function () {
     		});
     	});
 
-    	const AddMessage = (user, msg) => {
-    		let chatObj = { user, msg };
+    	const AddMessage = (user, msg, rows) => {
+    		let chatObj = { user, msg, rows };
     		chatHistory.push(chatObj);
 
     		// Clientside logging
@@ -4469,9 +4492,30 @@ var Index = (function () {
     	let username = "Guest";
     	let newMessage = "";
 
+    	const CalculateRows = inputString => {
+    		let maxrows = 30;
+    		let cols = 55;
+    		let arraytxt = inputString.split('\n');
+    		let rows = arraytxt.length;
+    		for (let i = 0; i < arraytxt.length; i++) rows += parseInt(arraytxt[i].length / cols);
+
+    		return new Promise((resolve, reject) => {
+    				if (rows > maxrows) {
+    					rows = maxrows;
+    				} else {
+    					rows = rows;
+    				}
+
+    				resolve(rows);
+    			});
+    	};
+
     	//socket.emit("clientMessage", newMessage);
     	const SendMessage = async () => {
-    		let msgObj = { username, newMessage };
+    		// First calculate size of message
+    		let rows = await CalculateRows(newMessage);
+
+    		let msgObj = { username, newMessage, rows };
     		if (newMessage.length > 240) return console.error("Message is too long!");
 
     		let response = await fetch("/chat/message", {
@@ -4512,7 +4556,12 @@ var Index = (function () {
     		if (!~writable_props.indexOf(key) && key.slice(0, 2) !== '$$' && key !== 'slot') console_1.warn(`<Chat> was created with unknown prop '${key}'`);
     	});
 
-    	function textarea_input_handler() {
+    	function textarea_input_handler(each_value, i) {
+    		each_value[i].msg = this.value;
+    		$$invalidate(0, chatHistory);
+    	}
+
+    	function textarea_input_handler_1() {
     		newMessage = this.value;
     		$$invalidate(1, newMessage);
     	}
@@ -4531,6 +4580,7 @@ var Index = (function () {
     		AddMessage,
     		username,
     		newMessage,
+    		CalculateRows,
     		SendMessage,
     		NewLine,
     		AutoScroll
@@ -4556,6 +4606,7 @@ var Index = (function () {
     		SendMessage,
     		NewLine,
     		textarea_input_handler,
+    		textarea_input_handler_1,
     		click_handler
     	];
     }

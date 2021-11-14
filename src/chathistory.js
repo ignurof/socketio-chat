@@ -5,10 +5,11 @@ const GetChatHistory = () => {
     return chatHistory;
 }
 
-const AddMessage = (user, msg) => {
+const AddMessage = (user, msg, rows) => {
     let chatObj = {
         user,
-        msg
+        msg,
+        rows
     };
     chatHistory.push(chatObj);
     // Implement serverside logging

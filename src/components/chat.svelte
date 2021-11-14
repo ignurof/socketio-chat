@@ -19,18 +19,19 @@
         console.log("Connected to server");
 
         // Client socket listening to specific key emit from server socket
-        socket.on("serverMessage", (user, msg) => {
-            AddMessage(user, msg);
+        socket.on("serverMessage", (user, msg, rows) => {
+            AddMessage(user, msg, rows);
             // Force update so reactivity works
             chatHistory = chatHistory;
             AutoScroll();
         });
     });
 
-    const AddMessage = (user, msg) => {
+    const AddMessage = (user, msg, rows) => {
         let chatObj = {
             user,
-            msg
+            msg,
+            rows
         };
         chatHistory.push(chatObj);
         // Clientside logging
@@ -40,11 +41,33 @@
     let username = "Guest";
     let newMessage = "";
 
+    const CalculateRows = (inputString) => {
+        let maxrows=30; 
+        let cols = 55;
+        let arraytxt=inputString.split('\n');
+        let rows=arraytxt.length; 
+        for (let i=0;i<arraytxt.length;i++) 
+        rows+=parseInt(arraytxt[i].length/cols);
+
+        return new Promise((resolve, reject) => {
+            if (rows>maxrows){
+                rows=maxrows;
+            } else{
+                rows=rows;
+            }
+            resolve(rows);
+        });
+    }
+
    //socket.emit("clientMessage", newMessage);
     const SendMessage = async() => {
+        // First calculate size of message
+        let rows = await CalculateRows(newMessage);
+
         let msgObj = {
             username,
-            newMessage
+            newMessage,
+            rows
         };
 
         if(newMessage.length > 240) return console.error("Message is too long!");
@@ -82,6 +105,7 @@
         animateScroll.scrollToBottom();
     }
 
+
     // Reactively update the client-message fields
     $: chatHistory;
 </script>
@@ -106,13 +130,13 @@
         overflow-x: hidden;
         overflow-y: scroll;
         scrollbar-color: #dfdfdf #f8f8f8;
+        padding-bottom: 1em;
     }
 
     .client-message{
         background: #e4f4f7;
         width: 80%;
-        min-height: 14%;
-        max-height: 14%;
+        min-height: 10%;
         margin: 0 auto;
         margin-top: 1em;
         margin-left: 1.6em;
@@ -138,6 +162,7 @@
 
     .client-message:nth-child(even){
         background: #1E88E5;
+        color: #FFFFFF;
         border-top-right-radius: 0;
         border-top-left-radius: 4px;
         border-bottom-left-radius: 4px;
@@ -187,16 +212,16 @@
     }
 
     .client-message textarea{
+        color: #000000;
         margin: 0;
         position: relative;
         top: -1.8em;
         left: .4em;
-        width: 80%;
-        max-height: 80%;
-        overflow: hidden;
+        border: 1px solid red;
     }
 
     .client-message:nth-child(even) textarea{
+        color: #ffffff;
         position: relative;
         left: 7em;
     }
@@ -240,9 +265,9 @@
 
 <div class="chat-view" id="chat-box">
     {#each chatHistory as chatMessage, i}
-        <div class="client-message">
+        <div class="client-message" >
             <h4>{chatMessage.user}</h4>
-            <textarea rows=6 readonly wrap="soft">{chatMessage.msg}</textarea>
+            <textarea rows={chatMessage.rows} cols=55 readonly wrap="soft" bind:value={chatMessage.msg} />
         </div>
     {/each}
 </div>

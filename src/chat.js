@@ -22,9 +22,9 @@ router.get('/', (req, res) => {
 });
 
 router.post("/message", (req, res) => {
-    chathistory.AddMessage(req.body.username, req.body.newMessage);
+    chathistory.AddMessage(req.body.username, req.body.newMessage, req.body.rows);
 
-    io.emit("serverMessage", req.body.username, req.body.newMessage);
+    io.emit("serverMessage", req.body.username, req.body.newMessage, req.body.rows);
 
     res.send("Message sent!");
 });
