@@ -1,6 +1,6 @@
 <script>
     import { io } from "socket.io-client";
-    const socket = io("chat.ignurof.xyz");
+    const socket = io("localhost:3002");
 
     export let chatHistory = [];
 
@@ -33,19 +33,14 @@
     let username = "Guest";
     let newMessage = "";
 
-    /* Example request for a server emit
-    const TestData = async() => {
-        let response = await fetch("/test");
-        if(!response.ok) return console.error("ERROR FETCH");
-    }
-    */
-
    //socket.emit("clientMessage", newMessage);
     const SendMessage = async() => {
         let msgObj = {
             username,
             newMessage
         };
+
+        if(newMessage.length > 240) return console.error("Message is too long!");
 
         let response = await fetch("/chat/message", {
             method: "POST",
@@ -59,6 +54,21 @@
 
         let result = response.text();
         //console.log(result);
+        // Reset inputfield value
+        newMessage = "";
+    }
+
+    // Handles key events on inputbox, like pressing enter to send message
+    const NewLine = (event) => {
+        // 13 is the keycode for "enter"
+        if (event.keyCode == 13 && event.shiftKey) {
+            // Add line break
+            //newMessage += "\n";
+        }
+        if (event.keyCode == 13 && !event.shiftKey) {
+            // Send message
+            SendMessage();
+        }
     }
 
     // Reactively update the client-message fields
@@ -89,8 +99,9 @@
 
     .client-message{
         background: #e4f4f7;
-        width: 90%;
-        min-height: 10%;
+        width: 80%;
+        min-height: 14%;
+        max-height: 14%;
         margin: 0 auto;
         margin-top: 1em;
         margin-left: 1.6em;
@@ -128,7 +139,7 @@
     .client-message:nth-child(even)::before{
         content: '';
         top: -.4em;
-        left: 47.6em;
+        left: 42em;
         position: relative;
         display: block;
         width: 2em;
@@ -143,8 +154,12 @@
         font-size: 1.4em;
     }
 
-    p{
+    textarea{
         font-size: 1.2em;
+        font-family: 'Rubik';
+        resize: none;
+        border: 0;
+        background: inherit;
     }
 
     .client-message h4{
@@ -157,21 +172,22 @@
 
     .client-message:nth-child(even) h4{
         position: relative;
-        left: 30em;
+        left: 28.2em;
     }
 
-    .client-message p{
+    .client-message textarea{
         margin: 0;
         position: relative;
-        top: -2em;
-        padding-right: 6em;
-        padding-left: .5em;
+        top: -1.8em;
+        left: .4em;
+        width: 80%;
+        max-height: 80%;
+        overflow: hidden;
     }
 
-    .client-message:nth-child(even) p{
+    .client-message:nth-child(even) textarea{
         position: relative;
-        padding-left: 6em;
-        padding-right: .5em;
+        left: 7em;
     }
 
     .message-box{
@@ -184,7 +200,7 @@
         box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);
     }
 
-    .message-box fieldset{
+    .message-box textarea{
         border: 2px solid #d7e3e4;
         border-radius: 8px;
         background: #EBF8FA;
@@ -205,32 +221,7 @@
     /* RESPONSIVENESS */
     /* Desktop */
     @media screen and (min-width: 1026px) {
-        .chat-view{
-            height: 58%;
-        }
-
-        .client-message{
-            width: 80%;
-        }
-
-        .client-message:nth-child(even)::before{
-            content: '';
-            top: -.4em;
-            left: 55em;
-            position: relative;
-            display: block;
-            width: 2em;
-            height: 1em;
-            background-color: transparent;
-            border-top: 20px solid #1E88E5;
-            border-left: 20px solid transparent;
-            transform: rotateY(180deg);
-        }
-
-        .client-message:nth-child(even) h4{
-            position: relative;
-            left: 35em;
-        }
+        
     }
 </style>
 
@@ -240,13 +231,13 @@
     {#each chatHistory as chatMessage, i}
         <div class="client-message">
             <h4>{chatMessage.user}</h4>
-            <p>{chatMessage.msg}</p>
+            <textarea rows=6 readonly wrap="soft">{chatMessage.msg}</textarea>
         </div>
     {/each}
 </div>
 
 <div class="message-box">
-    <fieldset contenteditable="true" bind:textContent={newMessage} />
+    <textarea maxlength=240 id="inputbox" type="text" bind:value={newMessage} on:keypress={NewLine} wrap="soft"/>
     <svg xmlns="http://www.w3.org/2000/svg" width="49.369" height="49.384" viewBox="0 0 49.369 49.384" on:click={() => SendMessage()}>
         <path id="Path_3" data-name="Path 3" d="M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z" transform="translate(-0.01 0.031)" fill="#1e88e5"/>
     </svg>      
