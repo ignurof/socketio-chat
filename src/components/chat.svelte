@@ -42,7 +42,7 @@
     let newMessage = "";
 
     const CalculateRows = (inputString) => {
-        let maxrows=30; 
+        let maxrows=12; 
         let cols = 55;
         let arraytxt=inputString.split('\n');
         let rows=arraytxt.length; 
@@ -90,10 +90,20 @@
 
     // Handles key events on inputbox, like pressing enter to send message
     const NewLine = (event) => {
+        // prevent default behavior like default new line
+        if(event.keyCode == 13) event.preventDefault();
+
+        // check if rowlimit
+        let currentNumRows = (newMessage.match(/\n/g) || []).length + 1,
+        maxNumRows = 12;
+        if(event.keyCode == 13 && currentNumRows == maxNumRows){
+            return false;
+        }
+
         // 13 is the keycode for "enter"
         if (event.keyCode == 13 && event.shiftKey) {
             // Add line break
-            //newMessage += "\n";
+            newMessage += "\n";
         }
         if (event.keyCode == 13 && !event.shiftKey) {
             // Send message
@@ -223,6 +233,8 @@
         position: relative;
         top: -2.4em;
         left: .4em;
+        border: 1px solid red;
+        overflow: hidden;
     }
 
     .client-message#incoming textarea{
@@ -251,8 +263,8 @@
         width: 90%;
         height: 70%;
         font-size: 1em;
-        margin-top: .4em;
-        margin-left: .4em;
+        margin-top: .6em;
+        margin-left: .6em;
     }
 
     .input-box textarea::-webkit-scrollbar{
@@ -260,9 +272,7 @@
     }
 
     .input-box svg{
-        margin-left: 1em;
-        margin-right: 1.4em;
-        margin-top: 1.4em;
+        margin: 1em;
         cursor: pointer;
     }
 
@@ -280,19 +290,19 @@
         {#if chatMessage.user === username}
             <div class="client-message" >
                 <h4>{chatMessage.user}</h4>
-                <textarea rows={chatMessage.rows} cols=55 readonly wrap="soft" bind:value={chatMessage.msg} />
+                <textarea rows={chatMessage.rows} cols=50 readonly bind:value={chatMessage.msg} />
             </div>
         {:else}
             <div class="client-message" id="incoming">
                 <h4>{chatMessage.user}</h4>
-                <textarea rows={chatMessage.rows} cols=55 readonly wrap="soft" bind:value={chatMessage.msg} />
+                <textarea rows={chatMessage.rows} cols=50 readonly bind:value={chatMessage.msg} />
             </div>
         {/if}
     {/each}
 </div>
 
 <div class="input-box">
-    <textarea maxlength=300 id="inputbox" type="text" bind:value={newMessage} on:keypress={NewLine} wrap="soft"/>
+    <textarea maxlength=300 id="inputbox" type="text" bind:value={newMessage} on:keypress={NewLine}/>
     <svg xmlns="http://www.w3.org/2000/svg" width="49.369" height="49.384" viewBox="0 0 49.369 49.384" on:click={() => SendMessage()}>
         <path id="Path_3" data-name="Path 3" d="M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z" transform="translate(-0.01 0.031)" fill="#1e88e5"/>
     </svg>      
