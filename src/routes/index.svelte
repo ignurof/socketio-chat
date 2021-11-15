@@ -8,7 +8,7 @@
 
     main{
         margin: 0 auto;
-        width: 90%;
+        width: 50%;
         height: 90vh;
         display: flex;
         flex-direction: column;
@@ -21,8 +21,13 @@
         height: 10vh;
         color: #EFEFEF;
         text-align: center;
-        padding-top: 3em;
-        font-size: 2em;
+        font-size: 1em;
+    }
+
+    footer p{
+        padding: 0;
+        margin: 0;
+        padding-top: 1.5em;
     }
 
     footer a{
@@ -31,20 +36,18 @@
     }
 
     /* RESPONSIVENESS */
-    /* Desktop */
-    @media screen and (min-width: 1026px) {
-        main{
-            width: 60%;
-        }
+    @media screen and (min-width: 320px) and (max-width: 767px){
+        
+    }
 
-        footer{
-            background: #00897B;
-            height: 10vh;
-            color: #EFEFEF;
-            text-align: center;
-            padding-top: 1.4em;
-            font-size: 1.4em;
-        }
+    /* iPad */
+    @media screen and (min-width: 768px) and (max-width: 1024px){
+
+    }
+
+    /* iPad Pro */
+    @media screen and (min-width: 1024px) and (max-width: 1366px){
+
     }
     
 </style>
@@ -53,5 +56,5 @@
     <Chat {chatHistory}/>
 </main>
 <footer>
-    Copyright 2021 - <a href="https://ignurof.xyz" target="_blank">ignurof.xyz</a>
+    <p>Copyright 2021 - <a href="https://ignurof.xyz" target="_blank">ignurof.xyz</a></p>
 </footer>

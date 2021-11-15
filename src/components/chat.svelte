@@ -1,7 +1,7 @@
 <script>
     import * as animateScroll from "svelte-scrollto";
     import { io } from "socket.io-client";
-    const socket = io("localhost:3002");
+    const socket = io("http://localhost:3002");
 
     animateScroll.setGlobalOptions({
         container: "#chat-box",
@@ -38,7 +38,7 @@
         console.log("Client Message: " + msg);
     }
 
-    let username = "Guest 2";
+    let username = "Guest";
     let newMessage = "";
 
     const CalculateRows = (inputString) => {
@@ -70,7 +70,7 @@
             rows
         };
 
-        if(newMessage.length > 240) return console.error("Message is too long!");
+        if(newMessage.length > 300) return console.error("Message is too long!");
 
         let response = await fetch("/chat/message", {
             method: "POST",
@@ -116,7 +116,7 @@
     h1{
         margin: 0 auto;
         margin-top: 1em;
-        font-size: 64px;
+        font-size: 4em;
         color: #FFFFFF;
     }
 
@@ -129,8 +129,14 @@
         box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);
         overflow-x: hidden;
         overflow-y: scroll;
-        scrollbar-color: #dfdfdf #f8f8f8;
         padding-bottom: 1em;
+        /* Firefox */
+        scrollbar-color: #dfdfdf #f8f8f8;
+    }
+
+    /* Chrome et al */
+    .chat-view::-webkit-scrollbar{
+        display:none;
     }
 
     .client-message{
@@ -192,11 +198,11 @@
     }
 
     h4{
-        font-size: 1.4em;
+        font-size: 1.2em;
     }
 
     textarea{
-        font-size: 1.2em;
+        font-size: 1em;
         font-family: 'Rubik';
         resize: none;
         border: 0;
@@ -207,7 +213,7 @@
         margin: 0;
         margin-bottom: .2em;
         position: relative;
-        top: -1.6em;
+        top: -2em;
         left: .4em;
     }
 
@@ -215,9 +221,8 @@
         color: #000000;
         margin: 0;
         position: relative;
-        top: -1.8em;
+        top: -2.4em;
         left: .4em;
-        border: 1px solid red;
     }
 
     .client-message#incoming textarea{
@@ -226,10 +231,9 @@
         position: relative;
         top: -1.8em;
         left: .4em;
-        border: 1px solid red;
     }
 
-    .message-box{
+    .input-box{
         display: flex;
         flex-direction: row;
         background: #FCFCFC;
@@ -237,20 +241,25 @@
         width: 100%;
         height: 6em;
         box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);
+        margin-bottom: 2em;
     }
 
-    .message-box textarea{
+    .input-box textarea{
         border: 2px solid #d7e3e4;
         border-radius: 8px;
         background: #EBF8FA;
         width: 90%;
         height: 70%;
-        margin: .3em;
-        font-size: 1.4em;
-        padding: .3em;
+        font-size: 1em;
+        margin-top: .4em;
+        margin-left: .4em;
     }
 
-    .message-box svg{
+    .input-box textarea::-webkit-scrollbar{
+        display: none;
+    }
+
+    .input-box svg{
         margin-left: 1em;
         margin-right: 1.4em;
         margin-top: 1.4em;
@@ -282,8 +291,8 @@
     {/each}
 </div>
 
-<div class="message-box">
-    <textarea maxlength=240 id="inputbox" type="text" bind:value={newMessage} on:keypress={NewLine} wrap="soft"/>
+<div class="input-box">
+    <textarea maxlength=300 id="inputbox" type="text" bind:value={newMessage} on:keypress={NewLine} wrap="soft"/>
     <svg xmlns="http://www.w3.org/2000/svg" width="49.369" height="49.384" viewBox="0 0 49.369 49.384" on:click={() => SendMessage()}>
         <path id="Path_3" data-name="Path 3" d="M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z" transform="translate(-0.01 0.031)" fill="#1e88e5"/>
     </svg>      
