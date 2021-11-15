@@ -33,6 +33,8 @@
         font-weight: bold;
         margin: 0 auto;
         margin-top: 2em;
+        border: 1px solid red;
+        margin-left: 15%;
     }
 
     input{
