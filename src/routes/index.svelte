@@ -2,7 +2,8 @@
     import Chat from "../components/chat.svelte"; // <Chat {chatHistory}/>
     //export let chatHistory = [];
 
-    import Register from "../components/register.svelte";
+    import Register from "../components/register.svelte"; // <Register />
+    import Login from "../components/login.svelte"; // <Login />
 </script>
 
 <style>
@@ -50,7 +51,7 @@
     /* iPad */
     @media screen and (min-width: 768px) {
         main {
-            width: 70%;
+            width: 50%;
         }
 
         footer p{
@@ -62,7 +63,7 @@
     /* iPad Pro */
     @media screen and (min-width: 1024px){
         main {
-            width: 60%;
+            width: 40%;
         }
 
         footer p{
@@ -73,7 +74,7 @@
     /* Generic Laptop */
     @media screen and (min-width: 1280px){
         main {
-            width: 50%;
+            width: 30%;
         }
 
         footer p{
@@ -84,7 +85,7 @@
     /* Desktop */
     @media screen and (min-width: 1920px){
         main{
-            width: 30%;
+            width: 20%;
         }
 
         footer p{

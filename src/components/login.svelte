@@ -12,11 +12,11 @@
         color: #FFFFFF;
     }
 
-    .register{
+    .login{
         background: #FCFCFC;
         border-radius: 8px;
         width: 100%;
-        height: 80%;
+        height: 60%;
         box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);
         margin-bottom: 1em;
         display: flex;
@@ -52,7 +52,7 @@
         border: 0;
         padding: 0;
         font-size: 2em;
-        margin-top: .8em;
+        margin-top: 1.4em;
         margin-left: auto;
         margin-right: auto;
         width: 50%;
@@ -71,30 +71,30 @@
     /* RESPONSIVENESS , top of order is more important, so specific goes at the top*/
     /* iPhone X */
     @media screen and (min-width: 375px){
-        .register{
-            height: 65%;
+        .login{
+            height: 55%;
         }
         
         button{
-            margin-top: 1.4em;
+            margin-top: 2em;
         }
     } 
 
     /* Pixel 2 */
     @media screen and (min-width: 411px){
-        .register{
-            height: 70%;
+        .login{
+            height: 60%;
         }
 
         button{
-            margin-top: 1.2em;
+            margin-top: 2em;
         }
     }
     
     /* iPad */
     @media screen and (min-width: 768px) {
-        .register{
-            height: 65%;
+        .login{
+            height: 55%;
         }
 
         .space{
@@ -102,15 +102,26 @@
         }
 
         button{
-            margin-top: 2.2em;
+            margin-top: 2.6em;
         }
     }
 
 
     /* iPad Pro */
     @media screen and (min-width: 1024px){
-        .register{
-            height: 50%;
+        .login{
+            height: 45%;
+        }
+
+        button{
+            margin-top: 3em;
+        }
+    }
+
+    /* Generic Laptop */
+    @media screen and (min-width: 1280px){
+        .login{
+            height: 55%;
         }
 
         button{
@@ -118,37 +129,27 @@
         }
     }
 
-    /* Generic Laptop */
-    @media screen and (min-width: 1280px){
-        .register{
-            height: 60%;
-        }
-
-        button{
-            margin-top: 1.4em;
-        }
-    }
-
     /* Desktop */
     @media screen and (min-width: 1920px){
+        .login{
+            height: 50%;
+        }
+
         button{
-            margin-top: 1.4em;
+            margin-top: 2.4em;
         }
     }
 </style>
 
-<h1>REGISTER</h1>
+<h1>LOGIN</h1>
 
-<div class="register">
+<div class="login">
     <div class="space"></div>
     <legend>USERNAME</legend>
-    <input type="text" />
-
-    <legend>EMAIL</legend>
     <input type="text" />
 
     <legend>PASSWORD</legend>
     <input type="text" />
 
-    <button>Sign Up</button>
+    <button>ENTER</button>
 </div>
