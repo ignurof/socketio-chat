@@ -1,7 +1,7 @@
 <script>
     import * as animateScroll from "svelte-scrollto";
     import { io } from "socket.io-client";
-    const socket = io("http://localhost:3002");
+    const socket = io("localhost:3002"); // REMEMBER TO UPDATE THIS ON DEV/PROD (TODO: Make it so it gets pulled from config)
 
     animateScroll.setGlobalOptions({
         container: "#chat-box",
@@ -233,6 +233,11 @@
         font-size: 1em;
         margin-top: .6em;
         margin-left: .6em;
+        overflow-x: hidden;
+        overflow-y: scroll;
+        /* Firefox */
+        scrollbar-color: rgba(255, 255, 255, 0) rgba(255, 255, 255, 0);
+        scrollbar-width: none;
     }
 
     .input-box textarea::-webkit-scrollbar{
