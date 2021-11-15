@@ -1,6 +1,8 @@
 <script>
-    import Chat from "../components/chat.svelte";
-    export let chatHistory = [];
+    import Chat from "../components/chat.svelte"; // <Chat {chatHistory}/>
+    //export let chatHistory = [];
+
+    import Register from "../components/register.svelte";
 </script>
 
 <style>
@@ -48,7 +50,7 @@
     /* iPad */
     @media screen and (min-width: 768px) {
         main {
-            width: 90%;
+            width: 70%;
         }
 
         footer p{
@@ -60,7 +62,7 @@
     /* iPad Pro */
     @media screen and (min-width: 1024px){
         main {
-            width: 80%;
+            width: 60%;
         }
 
         footer p{
@@ -68,10 +70,21 @@
         }
     }
 
+    /* Generic Laptop */
+    @media screen and (min-width: 1280px){
+        main {
+            width: 50%;
+        }
+
+        footer p{
+            padding-top: 3em;
+        }
+    }
+
     /* Desktop */
     @media screen and (min-width: 1920px){
         main{
-            width: 50%;
+            width: 30%;
         }
 
         footer p{
@@ -81,7 +94,7 @@
 </style>
 
 <main>
-    <Chat {chatHistory}/>
+    <Register />
 </main>
 <footer>
     <p>Copyright 2021 - <a href="https://ignurof.xyz" target="_blank">ignurof.xyz</a></p>
