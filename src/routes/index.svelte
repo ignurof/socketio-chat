@@ -8,7 +8,6 @@
 
     main{
         margin: 0 auto;
-        width: 50%;
         height: 90vh;
         display: flex;
         flex-direction: column;
@@ -27,7 +26,6 @@
     footer p{
         padding: 0;
         margin: 0;
-        padding-top: 1.5em;
     }
 
     footer a{
@@ -36,20 +34,50 @@
     }
 
     /* RESPONSIVENESS */
-    @media screen and (min-width: 320px) and (max-width: 767px){
-        
+    /* Mobile */
+    @media screen and (min-width: 320px){
+        main{
+            width: 96%;
+        }
+
+        footer p{
+            padding-top: 1.6em;
+        }
     }
 
     /* iPad */
-    @media screen and (min-width: 768px) and (max-width: 1024px){
+    @media screen and (min-width: 768px) {
+        main {
+            width: 90%;
+        }
+
+        footer p{
+            padding-top: 2.4em;
+        }
 
     }
 
     /* iPad Pro */
-    @media screen and (min-width: 1024px) and (max-width: 1366px){
+    @media screen and (min-width: 1024px){
+        main {
+            width: 80%;
+        }
 
+        footer p{
+            padding-top: 3.4em;
+        }
     }
-    
+
+    /* Desktop */
+    @media screen and (min-width: 1920px){
+        main{
+            width: 50%;
+        }
+
+        footer p{
+            padding-top: 2.4em;
+        }
+    }
 </style>
 
 <main>

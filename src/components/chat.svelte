@@ -5,7 +5,7 @@
 
     animateScroll.setGlobalOptions({
         container: "#chat-box",
-        offset: "200"
+        offset: "20"
     });
 
     export let chatHistory = [];
@@ -96,12 +96,10 @@
         // check if rowlimit
         let currentNumRows = (newMessage.match(/\n/g) || []).length + 1,
         maxNumRows = 12;
-        if(event.keyCode == 13 && currentNumRows == maxNumRows){
-            return false;
-        }
 
         // 13 is the keycode for "enter"
         if (event.keyCode == 13 && event.shiftKey) {
+            if(currentNumRows == maxNumRows) return false;
             // Add line break
             newMessage += "\n";
         }
@@ -135,79 +133,58 @@
         border-radius: 8px;
         width: 100%;
         height: 80%;
-        margin-bottom: 2em;
         box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);
         overflow-x: hidden;
         overflow-y: scroll;
-        padding-bottom: 1em;
         /* Firefox */
-        scrollbar-color: #dfdfdf #f8f8f8;
+        scrollbar-color: rgba(255, 255, 255, 0) rgba(255, 255, 255, 0);
+        scrollbar-width: none;
+        margin-bottom: 1em;
     }
 
     /* Chrome et al */
     .chat-view::-webkit-scrollbar{
-        display:none;
+        display: none;
     }
 
     .client-message{
         background: #e4f4f7;
-        width: 80%;
+        max-width: 60%;
         min-height: 10%;
-        margin: 0 auto;
-        margin-top: 1em;
-        margin-left: 1.6em;
-        border-top-right-radius: 4px;
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
-        padding: .4em;
+        border-radius: 4px;
+        margin: 1em;
+        padding: .2em;
+        padding-right: .3em;
     }
 
+    /* Reference for later (was a little speechbubblethingy)
     .client-message::before{
         content: '';
-        top: -.4em;
-        left: -1.4em;
-        position: relative;
         display: block;
-        width: 2em;
+        width: 100%;
         height: 1em;
         background-color: transparent;
-        border-top: 20px solid #e4f4f7;
+        border-top: 20px solid #010202;
         border-left: 20px solid transparent;
+        margin: 1em;
     }
+    */
 
-    .client-message#incoming{
+    .incoming{
         background: #1E88E5;
         color: white;
-        width: 80%;
+        max-width: 60%;
         min-height: 10%;
-        margin: 0 auto;
-        margin-top: 1em;
-        margin-left: 1.6em;
-        border-top-right-radius: 4px;
-        border-top-left-radius: 0;
-        border-bottom-left-radius: 4px;
-        border-bottom-right-radius: 4px;
-        padding: .4em;
-        position: relative;
-        left: 6em;
-    }
-
-    .client-message#incoming::before{
-        content: '';
-        top: -.4em;
-        left: 42em;
-        position: relative;
-        display: block;
-        width: 2em;
-        height: 1em;
-        background-color: transparent;
-        border-top: 20px solid #1E88E5;
-        border-left: 20px solid transparent;
-        transform: rotateY(180deg);
+        border-radius: 4px;
+        margin: 1em;
+        padding: .2em;
+        padding-right: .3em;
+        margin-left: auto;
     }
 
     h4{
+        margin: 0;
+        width: 100%;
         font-size: 1.2em;
     }
 
@@ -217,32 +194,23 @@
         resize: none;
         border: 0;
         background: inherit;
+        margin: 0;
+        overflow: hidden;
+        width: 100%;
+        padding: 0;
     }
 
-    .client-message h4{
-        margin: 0;
-        margin-bottom: .2em;
-        position: relative;
-        top: -2em;
-        left: .4em;
+    .incoming h4{
+        text-align: end;
     }
 
     .client-message textarea{
         color: #000000;
-        margin: 0;
-        position: relative;
-        top: -2.4em;
-        left: .4em;
-        border: 1px solid red;
-        overflow: hidden;
     }
 
-    .client-message#incoming textarea{
+    .incoming textarea{
         color: #ffffff;
-        margin: 0;
-        position: relative;
-        top: -1.8em;
-        left: .4em;
+        text-align: end;
     }
 
     .input-box{
@@ -277,9 +245,24 @@
     }
 
     /* RESPONSIVENESS */
+    /* Mobile */
+    @media screen and (min-width: 320px){
+
+    }
+
+    /* iPad */
+    @media screen and (min-width: 768px) {
+
+    }
+
+    /* iPad Pro */
+    @media screen and (min-width: 1024px){
+
+    }
+
     /* Desktop */
-    @media screen and (min-width: 1026px) {
-        
+    @media screen and (min-width: 1920px){
+
     }
 </style>
 
@@ -290,19 +273,19 @@
         {#if chatMessage.user === username}
             <div class="client-message" >
                 <h4>{chatMessage.user}</h4>
-                <textarea rows={chatMessage.rows} cols=50 readonly bind:value={chatMessage.msg} />
+                <textarea rows={chatMessage.rows} disabled readonly bind:value={chatMessage.msg} />
             </div>
         {:else}
-            <div class="client-message" id="incoming">
+            <div class="incoming">
                 <h4>{chatMessage.user}</h4>
-                <textarea rows={chatMessage.rows} cols=50 readonly bind:value={chatMessage.msg} />
+                <textarea rows={chatMessage.rows} disabled readonly bind:value={chatMessage.msg} />
             </div>
         {/if}
     {/each}
 </div>
 
 <div class="input-box">
-    <textarea maxlength=300 id="inputbox" type="text" bind:value={newMessage} on:keypress={NewLine}/>
+    <textarea maxlength=300 id="input-box" type="text" bind:value={newMessage} on:keypress={NewLine}/>
     <svg xmlns="http://www.w3.org/2000/svg" width="49.369" height="49.384" viewBox="0 0 49.369 49.384" on:click={() => SendMessage()}>
         <path id="Path_3" data-name="Path 3" d="M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z" transform="translate(-0.01 0.031)" fill="#1e88e5"/>
     </svg>      
