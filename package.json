@@ -17,7 +17,10 @@
   },
   "homepage": "https://github.com/ignurof/socketio-chat#readme",
   "dependencies": {
+    "bcrypt": "^5.0.1",
+    "blueimp-md5": "^2.19.0",
     "express": "^4.17.1",
+    "mongoose": "^6.0.13",
     "socket.io": "^4.3.2",
     "socket.io-client": "^4.3.2",
     "svelte": "^3.44.1",

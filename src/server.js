@@ -3,6 +3,26 @@ const express = require("express");
 const cors = require("cors");
 const svelteViewEngine = require("svelte-view-engine");
 const config = require("../config.js");
+const mongoose = require('mongoose');
+
+const DBTest = async() => {
+    // Open connection
+    await mongoose.connect('mongodb://localhost:27017/chat');
+    // Declare a Schema
+    const accountSchema = new mongoose.Schema({
+        username: String
+    });
+    // Compile Schema to Model (Mongoose auto adds "s" to the end of the Model name in MongoDB)
+    const UserAccount = mongoose.model("Account", accountSchema);
+    // Use Model to create Document
+    const testUser = new UserAccount({ username: "Test Dude" });
+    console.log(testUser);
+    // Save Document to DB in open connection
+    await testUser.save();
+}
+
+// Call the method and then catch errors
+DBTest().catch(err => console.log(err));
 
 // Application
 let app = express();
