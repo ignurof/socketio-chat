@@ -5,6 +5,9 @@
     let email;
     let password;
 
+    let isErrorShowing = false;
+    let popupErrorMessage = "default error";
+
     // https://regexr.com/
     const VerifyEmail = (input) => {
         let regex = /@*.\./i;
@@ -29,10 +32,22 @@
 
     // Attempt registration
     const Register = async() => {
+        let canSend = true;
         // Verify user input and sanitize
-        if(!VerifyEmail(email) || Sanitize(email)) return console.error("Email is invalid!");
-        if(Sanitize(username)) return console.error("Username is invalid!");
-        if(Sanitize(password)) return console.error("Password is invalid!");
+        if(!VerifyEmail(email) || Sanitize(email)){
+            popupErrorMessage = "Email is invalid!";
+            canSend = false;
+        }
+        if(Sanitize(username)){
+            popupErrorMessage = "Username is invalid!";
+            canSend = false;
+        } 
+        if(Sanitize(password)){
+            popupErrorMessage = "Password is invalid!";
+            canSend = false;
+        }
+        // If frontend determines we cant send data, return out and call the method
+        if(!canSend) return ToggleErrorPopup();
 
         let hashedPassword = await GenerateHash(password);
 
@@ -54,9 +69,15 @@
 
         if(!response.ok) return console.error("Fetch call failed!");
 
-        let result = await response.text();
-        // Catch possible errors and show error modal popup
-        console.log(result);
+        popupErrorMessage = await response.text();
+        if(popupErrorMessage === "OK") return; // Register() complete
+        // Catch possible errors and show error modal popup if register did not complete
+        ToggleErrorPopup();
+    }
+
+    
+    const ToggleErrorPopup = () => {
+        isErrorShowing = !isErrorShowing;
     }
 </script>
 
@@ -126,7 +147,55 @@
         background-image: linear-gradient(to right, #6bd7f8, #62e2bc);
     }
 
-    /* RESPONSIVENESS , top of order is more important, so specific goes at the top*/
+    .error{
+        z-index: 2;
+        background: rgba(0, 0, 0, 0.42);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        display:flex;
+        flex-direction: column;
+        justify-content: center; /* Vertical */
+        align-items: center; /* Hortizontal */
+    }
+
+    .error svg{
+        width: 10%;
+        margin-left: auto;
+        margin-bottom: auto;
+        cursor: pointer;
+        fill: red;
+        stroke: white;
+    }
+
+    .error svg:hover{
+        fill: rgb(222, 0, 0);
+        stroke: rgb(222, 222, 222);
+    }
+
+    .error p{
+        padding: 0;
+        margin: 0;
+        position: relative;
+        bottom: 40%;
+        font-size: 1.2em;
+    }
+
+    .error-modal{
+        background: #FCFCFC;
+        border-radius: 8px;
+        width: 90%;
+        height: 20%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Vertical */
+        align-items: center; /* Hortizontal */
+        margin-bottom: 10%;
+    }
+
+    /* RESPONSIVENESS , top of order is more important, so weird ones like the iPhone X goes here */
     /* iPhone X */
     @media screen and (min-width: 375px){
         .register{
@@ -147,6 +216,7 @@
         button{
             margin-top: 1.2em;
         }
+
     }
     
     /* iPad */
@@ -162,6 +232,10 @@
         button{
             margin-top: 2.2em;
         }
+
+        .error-modal{
+            width: 60%;
+        }
     }
 
 
@@ -174,6 +248,10 @@
         button{
             margin-top: 2.4em;
         }
+
+        .error-modal{
+            width: 50%;
+        }
     }
 
     /* Generic Laptop */
@@ -185,12 +263,20 @@
         button{
             margin-top: 1.4em;
         }
+
+        .error-modal{
+            width: 40%;
+        }
     }
 
     /* Desktop */
     @media screen and (min-width: 1920px){
         button{
             margin-top: 1.4em;
+        }
+
+        .error-modal{
+            width: 30%;
         }
     }
 </style>
@@ -210,3 +296,14 @@
 
     <button on:click={() => Register()}>Sign Up</button>
 </div>
+
+{#if isErrorShowing}
+    <div class="error">
+        <div class="error-modal">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" on:click={() => ToggleErrorPopup()}>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>{popupErrorMessage}</p>
+        </div>
+    </div>
+{/if}

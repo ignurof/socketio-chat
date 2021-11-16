@@ -30,6 +30,7 @@ const PORT = 3002;
 
 // Router
 const chat = require("./chat.js");
+const register = require("./register.js");
 
 // CORS SETUP
 let corsOptions = {
@@ -65,6 +66,8 @@ app.get("/", (req, res, next) => {
 
 // Chat endpoint router
 app.use("/chat", chat);
+
+app.use("/register", register)
 
 // Socket IO
 const socketio = require("socket.io");
