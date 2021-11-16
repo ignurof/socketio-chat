@@ -1,8 +1,67 @@
 <script>
+    import md5 from "blueimp-md5/js/md5.js"; // Need to delcare this npm module like this on client
+
     let isErrorShowing = false;
     let popupErrorMessage = "default error";
     const ToggleErrorPopup = () => {
         isErrorShowing = !isErrorShowing;
+    }
+
+    let username = "";
+    let password = "";
+
+    // Returns true if invalid characters such as "'(){}[]\/;
+    const Sanitize = (input) => {
+        // https://regex101.com/r/5xEdzq/1
+        let regex = /[\"\'\\\/\(\)\{\}\[\]\;]/g;
+        return regex.test(input);
+    }
+
+    // Await the promise before continue in flow
+    const GenerateHash = (input) => {
+        return new Promise((resolve, reject) => {
+            let output = md5(input);
+            resolve(output);
+        });
+    }
+
+    // Attempt login
+    const Login = async() => {
+        let canSend = true;
+        // Verify user input and sanitize
+        if(Sanitize(username)){
+            popupErrorMessage = "Username is invalid!";
+            canSend = false;
+        } 
+        if(Sanitize(password)){
+            popupErrorMessage = "Password is invalid!";
+            canSend = false;
+        }
+        // If frontend determines we cant send data, return out and call the method
+        if(!canSend) return ToggleErrorPopup();
+
+        let hashedPassword = await GenerateHash(password);
+
+        // Create User Account object
+        let userDetails = {
+            username,
+            hashedPassword
+        };
+
+        // Attempt fetch call
+        let response = await fetch("/login", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json;charset=utf-8"
+            },
+            body: JSON.stringify(userDetails)
+        });
+
+        if(!response.ok) return console.error("Fetch call failed!");
+
+        popupErrorMessage = await response.text();
+        // Catch possible errors and show error modal popup if register did not complete
+        ToggleErrorPopup();
     }
 </script>
 
@@ -118,10 +177,6 @@
     /* RESPONSIVENESS , top of order is more important, so weird ones like the iPhone X goes here */
     /* Galaxy S5 */
     @media screen and (min-width: 360px) and (max-width: 640px){
-        h1{
-            margin-top: 0;
-        }
-
         button{
             margin-top: 0;
             margin-bottom: 0;
@@ -171,12 +226,12 @@
 
 <div class="login">
     <legend>USERNAME</legend>
-    <input type="text" />
+    <input type="text" bind:value={username}/>
 
     <legend>PASSWORD</legend>
-    <input type="text" />
+    <input type="text" bind:value={password}/>
 
-    <button>ENTER</button>
+    <button on:click={() => Login()}>ENTER</button>
 </div>
 
 {#if isErrorShowing}

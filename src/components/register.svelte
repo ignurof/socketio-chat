@@ -192,10 +192,6 @@
     /* RESPONSIVENESS , top of order is more important, so weird ones like the iPhone X goes here */
     /* Galaxy S5 */
     @media screen and (min-width: 360px) and (max-width: 640px){
-        h1{
-            margin-top: 0;
-        }
-
         button{
             margin-top: 0;
             margin-bottom: 0;

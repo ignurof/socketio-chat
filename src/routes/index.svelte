@@ -46,6 +46,13 @@
 
     /* RESPONSIVENESS */
     /* Mobile */
+    /* Galaxy S5 */
+    @media screen and (min-width: 360px) and (max-width: 640px){
+        h1{
+            margin-top: 0;
+        }
+    }
+
     @media screen and (min-width: 320px){
         main{
             width: 96%;
