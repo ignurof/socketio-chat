@@ -51,7 +51,7 @@
     /* iPad */
     @media screen and (min-width: 768px) {
         main {
-            width: 50%;
+            width: 55%;
         }
 
         footer p{
@@ -63,7 +63,7 @@
     /* iPad Pro */
     @media screen and (min-width: 1024px){
         main {
-            width: 40%;
+            width: 45%;
         }
 
         footer p{
@@ -74,7 +74,7 @@
     /* Generic Laptop */
     @media screen and (min-width: 1280px){
         main {
-            width: 30%;
+            width: 35%;
         }
 
         footer p{
@@ -85,7 +85,7 @@
     /* Desktop */
     @media screen and (min-width: 1920px){
         main{
-            width: 20%;
+            width: 25%;
         }
 
         footer p{

@@ -93,25 +93,22 @@
     .register{
         background: #FCFCFC;
         border-radius: 8px;
-        width: 100%;
-        height: 80%;
         box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);
-        margin-bottom: 1em;
         display: flex;
         flex-direction: column;
-    }
-
-    .space{
-        margin-top: 1em;
+        justify-content: center;
+        align-items: center;
+        padding: 1em;
     }
 
     legend{
         font-size: 1.2em;
         font-family: 'Rubik';
         font-weight: bold;
-        margin: 0 auto;
+        margin: 0;
         margin-top: 2em;
-        margin-left: 15%;
+        margin-bottom: .4em;
+        width: 70%;
     }
 
     input{
@@ -121,20 +118,23 @@
         width: 70%;
         height: 8%;
         margin: 0;
-        margin-left: auto;
-        margin-right: auto;
         font-size: 1.2em;
+        padding: .6em;
+        margin-bottom: 1em;
     }
 
     button{
         border: 0;
         padding: 0;
+        padding-left: .8em;
+        padding-right: .8em;
+        padding-top: .4em;
+        padding-bottom: .4em;
         font-size: 2em;
-        margin-top: .8em;
-        margin-left: auto;
-        margin-right: auto;
-        width: 50%;
-        height: 14%;
+        margin: 0;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        width: 60%;
         color: white;
         border-radius: 64px;
         background-image: linear-gradient(to right, #47cff8, #4de0b4);
@@ -195,43 +195,31 @@
     }
 
     /* RESPONSIVENESS , top of order is more important, so weird ones like the iPhone X goes here */
-    /* iPhone X */
-    @media screen and (min-width: 375px){
-        .register{
-            height: 65%;
+    /* Galaxy S5 */
+    @media screen and (min-width: 360px) and (max-width: 640px){
+        h1{
+            margin-top: 0;
         }
-        
+
         button{
-            margin-top: 1.4em;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+    }
+    /* iPhone X */
+    @media screen and (min-width: 375px) and (max-width: 812px){
+        button{
+            margin-top: 1em;
+            margin-bottom: 1em;
         }
     } 
-
     /* Pixel 2 */
-    @media screen and (min-width: 411px){
-        .register{
-            height: 70%;
-        }
-
-        button{
-            margin-top: 1.2em;
-        }
-
+    @media screen and (min-width: 411px) and (max-width: 731px){
+        /* I dont need to specify here if I already have in iPhone X, but if I want more specific I can */
     }
     
     /* iPad */
     @media screen and (min-width: 768px) {
-        .register{
-            height: 65%;
-        }
-
-        .space{
-            margin-top: 2em;
-        }
-
-        button{
-            margin-top: 2.2em;
-        }
-
         .error-modal{
             width: 60%;
         }
@@ -240,14 +228,6 @@
 
     /* iPad Pro */
     @media screen and (min-width: 1024px){
-        .register{
-            height: 50%;
-        }
-
-        button{
-            margin-top: 2.4em;
-        }
-
         .error-modal{
             width: 50%;
         }
@@ -255,14 +235,6 @@
 
     /* Generic Laptop */
     @media screen and (min-width: 1280px){
-        .register{
-            height: 60%;
-        }
-
-        button{
-            margin-top: 1.4em;
-        }
-
         .error-modal{
             width: 40%;
         }
@@ -270,10 +242,6 @@
 
     /* Desktop */
     @media screen and (min-width: 1920px){
-        button{
-            margin-top: 1.4em;
-        }
-
         .error-modal{
             width: 30%;
         }
@@ -283,7 +251,6 @@
 <h1>REGISTER</h1>
 
 <div class="register">
-    <div class="space"></div>
     <legend>USERNAME</legend>
     <input type="text" bind:value={username} />
 
@@ -291,7 +258,7 @@
     <input type="text" bind:value={email} />
 
     <legend>PASSWORD</legend>
-    <input type="text" bind:value={password} />
+    <input type="password" bind:value={password} />
 
     <button on:click={() => Register()}>Sign Up</button>
 </div>
