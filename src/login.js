@@ -2,10 +2,16 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const cookieParser = require('cookie-parser');
+
+const authlist = require("./authlist.js");
 
 // Mongoose
 // Create instance of account model
 const Account = require("./models/account.js");
+
+// Parse cookies so they can be interacted with
+router.use(cookieParser());
 
 // middleware that is specific to this router
 router.use((req, res, next) => {
@@ -40,8 +46,11 @@ router.post("/", async(req, res) => {
     // Once in the blocklist, it should be removed from it only once a successfull login happens
     if(!isPasswordCorrect) return res.send("Failed attempt!");
 
+    let theToken = "testauth";
     // Registration successful
-    res.send("OK");
+    res.cookie("auth", theToken);
+    authlist.AddAuthTokenToList(theToken);
+    res.redirect("/chat");
 });
 
 module.exports = router;
