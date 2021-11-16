@@ -1,39 +1,35 @@
 <script>
-
+    let isErrorShowing = false;
+    let popupErrorMessage = "default error";
+    const ToggleErrorPopup = () => {
+        isErrorShowing = !isErrorShowing;
+    }
 </script>
 
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap');
 
-    h1{
-        margin: 0 auto;
-        margin-top: 1em;
-        font-size: 4em;
-        color: #FFFFFF;
-    }
-
     .login{
         background: #FCFCFC;
         border-radius: 8px;
-        width: 100%;
-        height: 60%;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
         box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);
-        margin-bottom: 1em;
         display: flex;
         flex-direction: column;
-    }
-
-    .space{
-        margin-top: 1em;
+        justify-content: center;
+        align-items: center;
+        padding: 1em;
     }
 
     legend{
         font-size: 1.2em;
         font-family: 'Rubik';
         font-weight: bold;
-        margin: 0 auto;
+        margin: 0;
         margin-top: 2em;
-        margin-left: 15%;
+        margin-bottom: .4em;
+        width: 70%;
     }
 
     input{
@@ -43,20 +39,23 @@
         width: 70%;
         height: 8%;
         margin: 0;
-        margin-left: auto;
-        margin-right: auto;
         font-size: 1.2em;
+        padding: .6em;
+        margin-bottom: 1em;
     }
 
     button{
         border: 0;
         padding: 0;
+        padding-left: .8em;
+        padding-right: .8em;
+        padding-top: .4em;
+        padding-bottom: .4em;
         font-size: 2em;
-        margin-top: 1.4em;
-        margin-left: auto;
-        margin-right: auto;
-        width: 50%;
-        height: 14%;
+        margin: 0;
+        margin-top: 1em;
+        margin-bottom: 1em;
+        width: 60%;
         color: white;
         border-radius: 64px;
         background-image: linear-gradient(to right, #47cff8, #4de0b4);
@@ -68,83 +67,109 @@
         background-image: linear-gradient(to right, #6bd7f8, #62e2bc);
     }
 
-    /* RESPONSIVENESS , top of order is more important, so specific goes at the top*/
-    /* iPhone X */
-    @media screen and (min-width: 375px){
-        .login{
-            height: 55%;
-        }
-        
-        button{
-            margin-top: 2em;
-        }
-    } 
+    .error{
+        z-index: 2;
+        background: rgba(0, 0, 0, 0.42);
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        display:flex;
+        flex-direction: column;
+        justify-content: center; /* Vertical */
+        align-items: center; /* Hortizontal */
+    }
 
-    /* Pixel 2 */
-    @media screen and (min-width: 411px){
-        .login{
-            height: 60%;
+    .error svg{
+        width: 10%;
+        margin-left: auto;
+        margin-bottom: auto;
+        cursor: pointer;
+        fill: red;
+        stroke: white;
+    }
+
+    .error svg:hover{
+        fill: rgb(222, 0, 0);
+        stroke: rgb(222, 222, 222);
+    }
+
+    .error p{
+        padding: 0;
+        margin: 0;
+        position: relative;
+        bottom: 40%;
+        font-size: 1.2em;
+    }
+
+    .error-modal{
+        background: #FCFCFC;
+        border-radius: 8px;
+        width: 90%;
+        height: 20%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Vertical */
+        align-items: center; /* Hortizontal */
+        margin-bottom: 10%;
+    }
+
+    /* RESPONSIVENESS , top of order is more important, so weird ones like the iPhone X goes here */
+    /* Galaxy S5 */
+    @media screen and (min-width: 360px) and (max-width: 640px){
+        h1{
+            margin-top: 0;
         }
 
         button{
-            margin-top: 2em;
+            margin-top: 0;
+            margin-bottom: 0;
         }
     }
-    
+    /* iPhone X */
+    @media screen and (min-width: 375px) and (max-width: 812px){
+        button{
+            margin-top: 1em;
+            margin-bottom: 1em;
+        }
+    } 
+    /* Pixel 2 */
+    @media screen and (min-width: 411px) and (max-width: 731px){
+        /* I dont need to specify here if I already have in iPhone X, but if I want more specific I can */
+    }
+
     /* iPad */
     @media screen and (min-width: 768px) {
-        .login{
-            height: 55%;
-        }
-
-        .space{
-            margin-top: 2em;
-        }
-
-        button{
-            margin-top: 2.6em;
+        .error-modal{
+            width: 60%;
         }
     }
 
 
     /* iPad Pro */
     @media screen and (min-width: 1024px){
-        .login{
-            height: 45%;
-        }
-
-        button{
-            margin-top: 3em;
+        .error-modal{
+            width: 50%;
         }
     }
 
     /* Generic Laptop */
     @media screen and (min-width: 1280px){
-        .login{
-            height: 55%;
-        }
-
-        button{
-            margin-top: 2.4em;
+        .error-modal{
+            width: 40%;
         }
     }
 
     /* Desktop */
     @media screen and (min-width: 1920px){
-        .login{
-            height: 50%;
-        }
-
-        button{
-            margin-top: 2.4em;
+        .error-modal{
+            width: 30%;
         }
     }
 </style>
 
-<h1>LOGIN</h1>
-
 <div class="login">
-    <div class="space"></div>
     <legend>USERNAME</legend>
     <input type="text" />
 
@@ -153,3 +178,14 @@
 
     <button>ENTER</button>
 </div>
+
+{#if isErrorShowing}
+    <div class="error">
+        <div class="error-modal">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" on:click={() => ToggleErrorPopup()}>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p>{popupErrorMessage}</p>
+        </div>
+    </div>
+{/if}

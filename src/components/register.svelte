@@ -83,16 +83,11 @@
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap');
 
-    h1{
-        margin: 0 auto;
-        margin-top: 1em;
-        font-size: 4em;
-        color: #FFFFFF;
-    }
-
     .register{
         background: #FCFCFC;
         border-radius: 8px;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
         box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);
         display: flex;
         flex-direction: column;
@@ -248,7 +243,6 @@
     }
 </style>
 
-<h1>REGISTER</h1>
 
 <div class="register">
     <legend>USERNAME</legend>
