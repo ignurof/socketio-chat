@@ -5,25 +5,6 @@ const svelteViewEngine = require("svelte-view-engine");
 const config = require("../config.js");
 const mongoose = require('mongoose');
 
-const DBTest = async() => {
-    // Open connection
-    await mongoose.connect('mongodb://localhost:27017/chat');
-    // Declare a Schema
-    const accountSchema = new mongoose.Schema({
-        username: String
-    });
-    // Compile Schema to Model (Mongoose auto adds "s" to the end of the Model name in MongoDB)
-    const UserAccount = mongoose.model("Account", accountSchema);
-    // Use Model to create Document
-    const testUser = new UserAccount({ username: "Test Dude" });
-    console.log(testUser);
-    // Save Document to DB in open connection
-    await testUser.save();
-}
-
-// Call the method and then catch errors
-DBTest().catch(err => console.log(err));
-
 // Application
 let app = express();
 const PORT = 3002;
@@ -72,8 +53,11 @@ app.use("/register", register)
 // Socket IO
 const socketio = require("socket.io");
 // Hook up the app.listen to a const so I can hook into it with socket listen aka io
-const server = app.listen(PORT, () => {
+const server = app.listen(PORT, async() => {
     console.log("Server listening on port: " + PORT);
+
+    // Open connection
+    await mongoose.connect('mongodb://localhost:27017/chat');
 });
 const io = socketio(server);
 

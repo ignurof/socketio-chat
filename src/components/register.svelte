@@ -70,7 +70,6 @@
         if(!response.ok) return console.error("Fetch call failed!");
 
         popupErrorMessage = await response.text();
-        if(popupErrorMessage === "OK") return; // Register() complete
         // Catch possible errors and show error modal popup if register did not complete
         ToggleErrorPopup();
     }
