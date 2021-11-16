@@ -1,7 +1,7 @@
 <script>
     import * as animateScroll from "svelte-scrollto";
     import { io } from "socket.io-client";
-    const socket = io("localhost:3002"); // REMEMBER TO UPDATE THIS ON DEV/PROD (TODO: Make it so it gets pulled from config)
+    const socket = io("chat.ignurof.xyz"); // REMEMBER TO UPDATE THIS ON DEV/PROD (TODO: Make it so it gets pulled from config)
 
     animateScroll.setGlobalOptions({
         container: "#chat-box",

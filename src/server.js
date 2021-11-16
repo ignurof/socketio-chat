@@ -20,8 +20,7 @@ let corsOptions = {
     "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
     "preflightContinue": false,
     "optionsSuccessStatus": 204,
-    "credentials": true,
-    "allowedHeaders": ['Origin', 'X-Requested-With', 'Content-Type', 'Accept']
+    "credentials": true
 }
 
 // Preflight request using corsOptions object, for all routes
@@ -60,7 +59,7 @@ const server = app.listen(PORT, async() => {
     console.log("Server listening on port: " + PORT);
 
     // Open connection
-    await mongoose.connect('mongodb://localhost:27017/chat');
+    await mongoose.connect('mongodb://127.0.0.1:27017/chat');
 });
 const io = socketio(server);
 
