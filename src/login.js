@@ -50,7 +50,7 @@ router.post("/", async(req, res) => {
     // Registration successful
     res.cookie("auth", theToken);
     authlist.AddAuthTokenToList(theToken);
-    res.redirect("/chat");
+    res.send("OK");
 });
 
 module.exports = router;

@@ -81,8 +81,6 @@
 </script>
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap');
-
     .register{
         background: #FCFCFC;
         border-radius: 8px;

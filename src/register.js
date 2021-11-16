@@ -1,8 +1,6 @@
 // Dependency imports
 const express = require("express");
 const router = express.Router();
-const md5 = require("blueimp-md5");
-const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
 
 // Mongoose

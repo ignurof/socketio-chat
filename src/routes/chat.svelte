@@ -119,15 +119,6 @@
 </script>
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap');
-
-    h1{
-        margin: 0 auto;
-        margin-top: 1em;
-        font-size: 4em;
-        color: #FFFFFF;
-    }
-
     .chat-view{
         background: #FCFCFC;
         border-radius: 8px;
@@ -250,48 +241,70 @@
     }
 
     /* RESPONSIVENESS */
-    /* Mobile */
-    @media screen and (min-width: 320px){
-
-    }
-
+    /* Overriding global.css */
     /* iPad */
     @media screen and (min-width: 768px) {
-
+        main {
+            width: 70%;
+        }
     }
 
     /* iPad Pro */
     @media screen and (min-width: 1024px){
+        main {
+            width: 65%;
+        }
+    }
 
+    /* Generic Laptop */
+    @media screen and (min-width: 1280px){
+        main {
+            width: 55%;
+        }
+
+        footer p{
+            padding-top: 3em;
+        }
     }
 
     /* Desktop */
     @media screen and (min-width: 1920px){
+        main{
+            width: 45%;
+        }
 
+        footer p{
+            padding-top: 2.4em;
+        }
     }
 </style>
 
-<h1>CHAT</h1>
+<main>
+    <h1>CHAT</h1>
 
-<div class="chat-view" id="chat-box">
-    {#each chatHistory as chatMessage, i}
-        {#if chatMessage.user === username}
-            <div class="client-message" >
-                <h4>{chatMessage.user}</h4>
-                <textarea rows={chatMessage.rows} disabled readonly bind:value={chatMessage.msg} />
-            </div>
-        {:else}
-            <div class="incoming">
-                <h4>{chatMessage.user}</h4>
-                <textarea rows={chatMessage.rows} disabled readonly bind:value={chatMessage.msg} />
-            </div>
-        {/if}
-    {/each}
-</div>
-
-<div class="input-box">
-    <textarea maxlength=300 id="input-box" type="text" bind:value={newMessage} on:keypress={NewLine}/>
-    <svg xmlns="http://www.w3.org/2000/svg" width="49.369" height="49.384" viewBox="0 0 49.369 49.384" on:click={() => SendMessage()}>
-        <path id="Path_3" data-name="Path 3" d="M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z" transform="translate(-0.01 0.031)" fill="#1e88e5"/>
-    </svg>      
-</div>
+    <div class="chat-view" id="chat-box">
+        {#each chatHistory as chatMessage, i}
+            {#if chatMessage.user === username}
+                <div class="client-message" >
+                    <h4>{chatMessage.user}</h4>
+                    <textarea rows={chatMessage.rows} disabled readonly bind:value={chatMessage.msg} />
+                </div>
+            {:else}
+                <div class="incoming">
+                    <h4>{chatMessage.user}</h4>
+                    <textarea rows={chatMessage.rows} disabled readonly bind:value={chatMessage.msg} />
+                </div>
+            {/if}
+        {/each}
+    </div>
+    
+    <div class="input-box">
+        <textarea maxlength=300 id="input-box" type="text" bind:value={newMessage} on:keypress={NewLine}/>
+        <svg xmlns="http://www.w3.org/2000/svg" width="49.369" height="49.384" viewBox="0 0 49.369 49.384" on:click={() => SendMessage()}>
+            <path id="Path_3" data-name="Path 3" d="M45.912.281,1.215,26.067a2.316,2.316,0,0,0,.212,4.166l10.251,4.3L39.383,10.117a.578.578,0,0,1,.829.8l-23.231,28.3v7.763a2.314,2.314,0,0,0,4.1,1.524L27.2,41.053l12.016,5.034A2.321,2.321,0,0,0,42.4,44.332L49.345,2.672A2.315,2.315,0,0,0,45.912.281Z" transform="translate(-0.01 0.031)" fill="#1e88e5"/>
+        </svg>      
+    </div>
+</main>
+<footer>
+    <p>Copyright 2021 - <a href="https://ignurof.xyz" target="_blank">ignurof.xyz</a></p>
+</footer>

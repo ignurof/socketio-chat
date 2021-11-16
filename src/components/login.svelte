@@ -60,14 +60,13 @@
         if(!response.ok) return console.error("Fetch call failed!");
 
         popupErrorMessage = await response.text();
+        if(popupErrorMessage === "OK") location.href = "/chat";
         // Catch possible errors and show error modal popup if register did not complete
         ToggleErrorPopup();
     }
 </script>
 
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300&display=swap');
-
     .login{
         background: #FCFCFC;
         border-radius: 8px;
