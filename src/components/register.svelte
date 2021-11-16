@@ -1,5 +1,63 @@
 <script>
+    import md5 from "blueimp-md5/js/md5.js"; // Need to delcare this npm module like this on client
 
+    let username;
+    let email;
+    let password;
+
+    // https://regexr.com/
+    const VerifyEmail = (input) => {
+        let regex = /@*.\./i;
+        // Returns true if email
+        return regex.test(input);
+    }
+
+    // Returns true if invalid characters such as "'(){}[]\/;
+    const Sanitize = (input) => {
+        // https://regex101.com/r/5xEdzq/1
+        let regex = /[\"\'\\\/\(\)\{\}\[\]\;]/g;
+        return regex.test(input);
+    }
+
+    // Await the promise before continue in flow
+    const GenerateHash = (input) => {
+        return new Promise((resolve, reject) => {
+            let output = md5(input);
+            resolve(output);
+        });
+    }
+
+    // Attempt registration
+    const Register = async() => {
+        // Verify user input and sanitize
+        if(!VerifyEmail(email) || Sanitize(email)) return console.error("Email is invalid!");
+        if(Sanitize(username)) return console.error("Username is invalid!");
+        if(Sanitize(password)) return console.error("Password is invalid!");
+
+        let hashedPassword = await GenerateHash(password);
+
+        // Create User Account object
+        let newUserAccount = {
+            username,
+            email,
+            hashedPassword
+        };
+
+        // Attempt fetch call
+        let response = await fetch("/register", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json;charset=utf-8"
+            },
+            body: JSON.stringify(newUserAccount)
+        });
+
+        if(!response.ok) return console.error("Fetch call failed!");
+
+        let result = await response.text();
+        // Catch possible errors and show error modal popup
+        console.log(result);
+    }
 </script>
 
 <style>
@@ -142,13 +200,13 @@
 <div class="register">
     <div class="space"></div>
     <legend>USERNAME</legend>
-    <input type="text" />
+    <input type="text" bind:value={username} />
 
     <legend>EMAIL</legend>
-    <input type="text" />
+    <input type="text" bind:value={email} />
 
     <legend>PASSWORD</legend>
-    <input type="text" />
+    <input type="text" bind:value={password} />
 
-    <button>Sign Up</button>
+    <button on:click={() => Register()}>Sign Up</button>
 </div>
