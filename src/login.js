@@ -3,6 +3,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser');
+const md5 = require("blueimp-md5");
 
 const authlist = require("./authlist.js");
 
@@ -46,10 +47,12 @@ router.post("/", async(req, res) => {
     // Once in the blocklist, it should be removed from it only once a successfull login happens
     if(!isPasswordCorrect) return res.send("Failed attempt!");
 
-    let theToken = "testauth";
+    let authToken = GenerateTimestamp();
+    let authID = doc.id; // ObjectID in MongoDB
+    let authCookie = `${authToken}#${authID}`;
     // Registration successful
-    res.cookie("auth", theToken);
-    authlist.AddAuthTokenToList(theToken);
+    res.cookie("auth", authCookie);
+    authlist.AddAuthTokenToList(authToken, authID);
     res.send("OK");
 });
 
@@ -61,3 +64,10 @@ const Sanitize = (input) => {
     let regex = /[\"\'\\\/\(\)\{\}\[\]\;]/g;
     return regex.test(input);
 }
+
+const GenerateTimestamp = () => {
+    let timestamp = Date.now(); // Time passed since 1970 Jan 1
+    timestamp = md5(timestamp);
+    return timestamp;
+}
+

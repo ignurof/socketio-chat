@@ -3,7 +3,7 @@ let activeToken = [];
 const VerifyUserAuth = (authToken) => {
     let tokenExists = false;
     for(let x = 0; x < activeToken.length; x++){
-        if(authToken === activeToken[x]){
+        if(authToken === activeToken[x].authToken){
             tokenExists = true;
             // Early return if true
             return tokenExists;
@@ -14,8 +14,12 @@ const VerifyUserAuth = (authToken) => {
     return tokenExists;
 }
 
-const AddAuthTokenToList = (authToken) => {
-    activeToken.push(authToken);
+const AddAuthTokenToList = (authToken, authID) => {
+    let authObj = {
+        authToken,
+        authID
+    };
+    activeToken.push(authObj);
 }
 
 module.exports = {

@@ -14,8 +14,7 @@ const chathistory = require("./chathistory.js");
 // middleware that is specific to this router
 router.use((req, res, next) => {
     // Verify authentication of client
-    let userIsAuth = authlist.VerifyUserAuth(req.cookies.auth);
-    if(!userIsAuth) return res.redirect("/");
+    VerifyAuth(req.cookies.auth);
 
     // Grab the reference so we can use it
     io = req.app.get('socketio');
@@ -39,3 +38,14 @@ router.post("/message", (req, res) => {
 });
 
 module.exports = router;
+
+const VerifyAuth = (authCookie) => {
+    let auth = authCookie.split('#');
+    let authObj = {
+        "token": auth[0],
+        "id": auth[1]
+    };
+
+    let userIsAuth = authlist.VerifyUserAuth(authObj.token);
+    if(!userIsAuth) return res.redirect('/');
+}
