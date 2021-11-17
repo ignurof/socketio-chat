@@ -125,7 +125,7 @@
         background: #FCFCFC;
         border-radius: 8px;
         width: 100%;
-        height: 80%;
+        min-height: 60%;
         box-shadow: 0px 6px 6px rgba(0, 0, 0, 0.24);
         overflow-x: hidden;
         overflow-y: scroll;
@@ -240,44 +240,6 @@
     .input-box svg{
         margin: 1em;
         cursor: pointer;
-    }
-
-    /* RESPONSIVENESS */
-    /* Overriding global.css */
-    /* iPad */
-    @media screen and (min-width: 768px) {
-        main {
-            width: 70%;
-        }
-    }
-
-    /* iPad Pro */
-    @media screen and (min-width: 1024px){
-        main {
-            width: 65%;
-        }
-    }
-
-    /* Generic Laptop */
-    @media screen and (min-width: 1280px){
-        main {
-            width: 55%;
-        }
-
-        footer p{
-            padding-top: 3em;
-        }
-    }
-
-    /* Desktop */
-    @media screen and (min-width: 1920px){
-        main{
-            width: 45%;
-        }
-
-        footer p{
-            padding-top: 2.4em;
-        }
     }
 </style>
 
