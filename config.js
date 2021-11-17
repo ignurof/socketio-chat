@@ -9,4 +9,13 @@ module.exports = {
         buildDir: `${__dirname}/build/routes`,
         assetsPrefix:  "/assets/",
     },
+
+    // CORS SETUP
+    corsOptions: {
+        "origin": 'chat.ignurof.xyz',
+        "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+        "preflightContinue": false,
+        "optionsSuccessStatus": 204,
+        "credentials": true
+    },
 };

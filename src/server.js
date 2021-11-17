@@ -5,7 +5,7 @@ const svelteViewEngine = require("svelte-view-engine");
 const config = require("../config.js");
 const mongoose = require('mongoose');
 
-// Application
+// Application                   // TODO: Måste flytta tillbaka font imports från global till varje sida. Gör så chat använder clients username. Gör så authlist även håller username. Ta bort denna user från authlist om denne loggas in igen.
 let app = express();
 const PORT = 3002;
 
@@ -14,21 +14,12 @@ const chat = require("./chat.js");
 const register = require("./register.js");
 const login = require("./login.js");
 
-// CORS SETUP
-let corsOptions = {
-    "origin": 'chat.ignurof.xyz',
-    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
-    "preflightContinue": false,
-    "optionsSuccessStatus": 204,
-    "credentials": true
-}
+// View Engine declarations
+let engine = svelteViewEngine(config.svelteViewEngine);
+let { corsOptions, dir, type, buildDir } = config.svelteViewEngine;
 
 // Preflight request using corsOptions object, for all routes
 app.use(cors(corsOptions))
-
-// View Engine declarations
-let engine = svelteViewEngine(config.svelteViewEngine);
-let { dir, type, buildDir } = config.svelteViewEngine;
 
 // View Engine setup
 app.engine(type, engine.render);
