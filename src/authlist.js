@@ -14,12 +14,22 @@ const VerifyUserAuth = (authToken) => {
     return tokenExists;
 }
 
-const AddAuthTokenToList = (authToken, authID) => {
+const AddAuthTokenToList = (authToken, authID) => {    
+    RemoveAuth(authID);
+
     let authObj = {
         authToken,
         authID
     };
     activeToken.push(authObj);
+    console.log(activeToken);
+}
+
+const RemoveAuth = (authID) => {
+    // We use the filter function to keep every element that is not equal to the element to be removed and assign the newly formed array to the original array.
+    activeToken = activeToken.filter((item) => {
+        return item.authID !== authID
+    });
 }
 
 module.exports = {

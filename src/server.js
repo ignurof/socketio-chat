@@ -5,7 +5,7 @@ const svelteViewEngine = require("svelte-view-engine");
 const config = require("../config.js");
 const mongoose = require('mongoose');
 
-// Application                   // TODO: Måste flytta tillbaka font imports från global till varje sida. Gör så chat använder clients username. Gör så authlist även håller username. Ta bort denna user från authlist om denne loggas in igen.
+// Application
 let app = express();
 const PORT = 3002;
 
@@ -58,12 +58,12 @@ const io = socketio(server);
 app.set('socketio', io);
 
 // This is what happens when a client connects to ws server
-io.on("connection", (socket) => {
+//io.on("connection", (socket) => {
     // Send from server to client, use key on both ends to access
     //socket.emit("world", "World");
 
     //socket.on("clientMessage", (clientMsg) => {
     //    console.log("CLIENT: " + clientMsg);
     //})
-});
+//});
 
