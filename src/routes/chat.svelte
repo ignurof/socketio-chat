@@ -149,18 +149,21 @@
         padding-right: .3em;
     }
 
-    /* Reference for later (was a little speechbubblethingy)
+    /* Reference for later (was a little speechbubblethingy)*/
     .client-message::before{
         content: '';
         display: block;
-        width: 100%;
-        height: 1em;
+        width: 1%;
         background-color: transparent;
-        border-top: 20px solid #010202;
+        border-top: 20px solid #e4f4f7;
         border-left: 20px solid transparent;
-        margin: 1em;
+        border-right: 20px solid transparent;
+        position: relative;
+        top: -.4em;
+        left: -8%;
+        transform: rotateZ(22deg);
     }
-    */
+    
 
     .incoming{
         background: #1E88E5;
@@ -172,6 +175,21 @@
         padding: .2em;
         padding-right: .3em;
         margin-left: auto;
+    }
+
+    .incoming::before{
+        content: '';
+        display: block;
+        width: 1%;
+        background-color: transparent;
+        border-top: 20px solid #1E88E5;
+        border-left: 20px solid transparent;
+        border-right: 20px solid transparent;
+        position: relative;
+        top: -.4em;
+        right: -90%;
+        transform: rotateY(180deg);
+        transform: rotateZ(-22deg);
     }
 
     h4{
@@ -239,6 +257,52 @@
     .input-box svg{
         margin: 1em;
         cursor: pointer;
+    }
+
+    /* OVERIDDE GLOBAL.css */
+    /* RESPONSIVENESS */
+    /* Mobile */
+    @media screen and (min-width: 320px){
+
+    }
+
+    /* iPad */
+    @media screen and (min-width: 768px) {
+        
+    }
+
+    /* Generic Laptop */
+    @media screen and (min-width: 1280px){
+        main {
+            width: 45%;
+        }
+
+        .client-message::before{
+            top: -.4em;
+            left: -5%;
+        }
+
+        .incoming::before{
+            top: -.4em;
+            right: -94%;
+        }
+    }
+
+    /* Desktop */
+    @media screen and (min-width: 1920px){
+        main{
+            width: 35%;
+        }
+
+        .client-message::before{
+            top: -.4em;
+            left: -5%;
+        }
+
+        .incoming::before{
+            top: -.4em;
+            right: -94%;
+        }
     }
 </style>
 
