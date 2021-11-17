@@ -9,6 +9,8 @@
     });
 
     export let chatHistory = [];
+    export let username = "Guest";
+    let newMessage = "";
 
     // Client socket callback that occurs on connection to server. 
     socket.on("connect", () => {
@@ -37,9 +39,6 @@
         // Clientside logging
         console.log("Client Message: " + msg);
     }
-
-    let username = "Guest";
-    let newMessage = "";
 
     const CalculateRows = (inputString) => {
         let maxrows=12; 
