@@ -6,6 +6,7 @@ const cookieParser = require('cookie-parser');
 const md5 = require("blueimp-md5");
 
 const authlist = require("./authlist.js");
+const blockauthlist = require("./blockauthlist.js");
 
 // Mongoose
 // Create instance of account model
@@ -31,12 +32,25 @@ router.post("/", async(req, res) => {
     if(Sanitize(req.body.username)) return res.send("Username is invalid!");
     if(Sanitize(req.body.hashedPassword)) return res.send("Password is invalid!");
 
+    // Block user from login attempt if they have failed too many times
+    // TODO: Maybe timeouts should set a cookie and that cookie changes the frontend so they cannot even try to login
+    let blockedStatus = false;
+    try{
+        blockedStatus = await blockauthlist.IsUserBlocked(req.body.username);
+    } catch(e){
+        console.error(e);
+    }
+
     // Check DB for already existing username
     let doesNotExist = false;
     let doc = await Account.findOne({ username: req.body.username });
     // Early return if user exists already in DB
     if(doc == null) doesNotExist = true;
-    if(doesNotExist) return res.send("User does not exist!");
+    if(doesNotExist){
+        blockauthlist.AddToBlock(req.body.username);
+        if(blockedStatus) return res.send("Timeout!");
+        return res.send("User does not exist!");
+    }
 
     //console.log(doc);
 
@@ -45,7 +59,14 @@ router.post("/", async(req, res) => {
 
     // Failed password check, this should add to timeout list, and after 5 failed attempts should be put into blocklist
     // Once in the blocklist, it should be removed from it only once a successfull login happens
-    if(!isPasswordCorrect) return res.send("Failed attempt!");
+    if(!isPasswordCorrect){
+        blockauthlist.AddToBlock(req.body.username);
+        if(blockedStatus) return res.send("Timeout!");
+        return res.send("Failed attempt!");
+    }
+
+    // Remove block on successfull login
+    blockauthlist.RemoveUserBlock(req.body.username);
 
     let authToken = GenerateTimestamp();
     let authID = doc.id; // ObjectID in MongoDB
