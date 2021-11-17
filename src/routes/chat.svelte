@@ -145,8 +145,8 @@
         min-height: 10%;
         border-radius: 4px;
         margin: 1em;
-        padding: .2em;
-        padding-right: .3em;
+        padding: .4em;
+        padding-left: .6em;
     }
 
     /* Reference for later (was a little speechbubblethingy)*/
@@ -172,8 +172,8 @@
         min-height: 10%;
         border-radius: 4px;
         margin: 1em;
-        padding: .2em;
-        padding-right: .3em;
+        padding: .4em;
+        padding-right: .6em;
         margin-left: auto;
     }
 
@@ -196,6 +196,8 @@
         margin: 0;
         width: 100%;
         font-size: 1.2em;
+        position: relative;
+        top: -1em;
     }
 
     textarea{
@@ -214,13 +216,20 @@
         text-align: end;
     }
 
+    .client-message h4{
+    }
+
     .client-message textarea{
         color: #000000;
+        position: relative;
+        top: -1em;
     }
 
     .incoming textarea{
         color: #ffffff;
         text-align: end;
+        position: relative;
+        top: -1em;
     }
 
     .input-box{
