@@ -1,31 +1,17 @@
 {
-  "name": "socketio-chat",
-  "version": "1.0.0",
-  "description": "Made with Express, Svelte &amp; SocketIO",
-  "main": "src/server.js",
-  "scripts": {
-    "start": "node src/server.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/ignurof/socketio-chat.git"
-  },
-  "author": "ignurof.xyz",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/ignurof/socketio-chat/issues"
-  },
-  "homepage": "https://github.com/ignurof/socketio-chat#readme",
-  "dependencies": {
-    "bcrypt": "^5.0.1",
-    "blueimp-md5": "^2.19.0",
-    "cookie-parser": "^1.4.6",
-    "express": "^4.17.1",
-    "mongoose": "^6.0.13",
-    "socket.io": "^4.3.2",
-    "socket.io-client": "^4.3.2",
-    "svelte": "^3.44.1",
-    "svelte-scrollto": "^0.2.0",
-    "svelte-view-engine": "github:Blade67/svelte-view-engine"
-  }
+	"name": "socketio-chat",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"dev": "vite dev",
+		"build": "vite build",
+		"preview": "vite preview"
+	},
+	"devDependencies": {
+		"@sveltejs/adapter-auto": "^2.0.0",
+		"@sveltejs/kit": "^1.20.4",
+		"svelte": "^4.0.0",
+		"vite": "^4.3.6"
+	},
+	"type": "module"
 }
