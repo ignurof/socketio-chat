@@ -1,12 +1,15 @@
-<h1>Hello, World!</h1>
-<p>made by ignurof, check out my <a href="https://github.com/ignurof" target="_BLANK">github</a> to find the source code.</p>
-
 <script>
 	console.log("Hello, World!");
 </script>
 
 <style>
-	p {
+	a {
 		background-color: red;
 	}
 </style>
+
+<h1>Index</h1>
+<a href="https://github.com/ignurof" target="_BLANK">github</a>
+<button>
+	<a href="/about">About</a>
+</button>
